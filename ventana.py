@@ -4,13 +4,13 @@ import tkinter.ttk as ttk
 import tkinter.messagebox
 from tkinter import filedialog
 
-rutas=[]
+rutas = []
 
 
 class Ventana:
-    
+
     def __init__(self, master):
-        self.nVentanas=0
+        self.nVentanas = 0
         # cuerpo general del frame----------------------------
         topFrame = Frame(master)
         topFrame.pack()
@@ -26,28 +26,40 @@ class Ventana:
         menuColores = Menu(barraMenu)
         menuDebug = Menu(barraMenu)
         menuAyuda = Menu(barraMenu)
+        menuReportes=Menu(barraMenu)
 
         barraMenu.add_cascade(label="Archivo", menu=menuArchivos)
         barraMenu.add_cascade(label="Colores", menu=menuColores)
         barraMenu.add_cascade(label="Debugger", menu=menuDebug)
+        barraMenu.add_cascade(label="Reportes",menu=menuReportes)
         barraMenu.add_cascade(label="Ayuda", menu=menuAyuda)
+        
 
-        menuArchivos.add_command(label="Nuevo",command=self.nuevo)
-        menuArchivos.add_command(label="Abrir...",command=self.abrir)
-        menuArchivos.add_command(label="Guardar",command=self.guardar)
-        menuArchivos.add_command(label="Guardar como...",command=self.guardarComo)
+        menuArchivos.add_command(label="Nuevo", command=self.nuevo)
+        menuArchivos.add_command(label="Abrir...", command=self.abrir)
+        menuArchivos.add_command(label="Guardar", command=self.guardar)
+        menuArchivos.add_command(label="Guardar como...", command=self.guardarComo)
         menuArchivos.add_separator()
-        menuArchivos.add_command(label="Salir",command=self.salir)
+        menuArchivos.add_command(label="Salir", command=self.salir)
 
-        menuColores.add_command(label="original",command=self.color1)
-        menuColores.add_command(label="negro",command=self.color2)
-        menuColores.add_command(label="azul",command=self.color3)
-        menuColores.add_command(label="morado",command=self.color4)
+        menuColores.add_command(label="original", command=self.color1)
+        menuColores.add_command(label="negro", command=self.color2)
+        menuColores.add_command(label="azul", command=self.color3)
+        menuColores.add_command(label="morado", command=self.color4)
 
-        menuDebug.add_command(label="debuggear",command=self.debugg)
+        menuDebug.add_command(label="debuggear", command=self.debugg)
 
-        menuAyuda.add_command(label="ayuda",command=self.ayuda)
-        menuAyuda.add_command(label="Sobre nosotros",command=self.aboutus)
+        menuReportes.add_command(label="Errores lexicos")
+        menuReportes.add_command(label="Errores lexicos")
+        menuReportes.add_command(label="Errores lexicos")
+        menuReportes.add_separator()
+        menuReportes.add_command(label="Tabla de Simbolos")
+        menuReportes.add_command(label="AST")
+        menuReportes.add_command(label="Reporte Gramatical")
+
+
+        menuAyuda.add_command(label="ayuda", command=self.ayuda)
+        menuAyuda.add_command(label="Sobre nosotros", command=self.aboutus)
 
         # fin menu------------------------
 
@@ -102,10 +114,10 @@ class Ventana:
         # fin bottomFrame----------------------------------------------------------------------------------------
 
     def getTextoActual(self):
-        return self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].get(1.0,END)
+        return self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].get(1.0, END)
 
     def ejecutar(self):
-        txtEntrada=self.getTextoActual()
+        txtEntrada = self.getTextoActual()
         print(self.esDescendente.get())
         if(self.esDescendente.get()):
             self.salida.insert(INSERT, txtEntrada)
@@ -115,61 +127,81 @@ class Ventana:
             print("ascendente")
 
     def nuevo(self):
-        editor = scrolledtext.ScrolledText(undo=True, width=80, height=10,wrap=WORD)
+        editor = scrolledtext.ScrolledText(
+            undo=True, width=80, height=10, wrap=WORD)
         editor['font'] = ('consolas', 12)
         editor.focus()
-        t0='Nuevo'+str(self.nVentanas)
+        t0 = 'Nuevo'+str(self.nVentanas)
         self.ventanas.add(editor, text=t0, padding=10)
-        self.nVentanas+=1
+        self.nVentanas += 1
         rutas.append(t0+'.txt')
 
     def abrir(self):
-        ftypes = [('Python files', '*.py'), ('All files', '*')]
-        dlg = filedialog.Open( filetypes = ftypes)
+        ftypes = [('All files', '*')]
+        dlg = filedialog.Open(filetypes=ftypes)
         fl = dlg.show()
         if fl != '':
-            text = open(fl,"r").read()
-            editor = scrolledtext.ScrolledText(undo=True, width=80, height=10,wrap=WORD)
-            editor['font'] = ('consolas', 12)
-            editor.insert(INSERT,text)
-            editor.focus()
-            self.ventanas.add(editor, text=fl, padding=10)
-            self.nVentanas+=1
-            rutas.append(fl)
+            with open(fl, "r") as f:
+                text = f.read()
+                editor = scrolledtext.ScrolledText(
+                    undo=True, width=80, height=10, wrap=WORD)
+                editor['font'] = ('consolas', 12)
+                editor.insert(INSERT, text)
+                editor.focus()
+                self.ventanas.add(editor, text=fl, padding=10)
+                self.nVentanas += 1
+                rutas.append(fl)
         print('abrir')
 
     def guardar(self):
-        print('guardar')
+        if(len(self.ventanas.tabs()) != 0 and len(rutas) > self.ventanas.index('current')):
+            with open(rutas[self.ventanas.index('current')], "w") as f:
+                f.write(self.getTextoActual())
+        else:
+            tkinter.messagebox.showerror(
+                "Error", "se encontro un error al guardar")
 
     def guardarComo(self):
-        print('guardar como...')
-
+        r=filedialog.asksaveasfilename()
+        if r!="" and (len(self.ventanas.tabs()) != 0 and len(rutas) > self.ventanas.index('current')):
+            with open(r, "w") as f:
+                f.write(self.getTextoActual())
+            rutas[self.ventanas.index('current')]=r
+            self.ventanas.tab(self.ventanas.tabs()[self.ventanas.index("current")],text=r)
+        else:
+            tkinter.messagebox.showerror(
+                "Error", "se encontro un error al guardar")
 
     def salir(self):
         ventana1.destroy()
 
     def color1(self):
-        self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].config( background="white")
-        
+        self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index(
+            "current")]).winfo_children()[1].config(background="white")
+
     def color2(self):
-        self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].config( background="gray")
+        self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index(
+            "current")]).winfo_children()[1].config(background="gray")
 
     def color3(self):
-        self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].config( background="RoyalBlue1")
+        self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index(
+            "current")]).winfo_children()[1].config(background="RoyalBlue1")
 
     def color4(self):
-        self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].config( background="MediumPurple1")
-
+        self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index(
+            "current")]).winfo_children()[1].config(background="MediumPurple1")
 
     def ayuda(self):
-        help=tkinter.messagebox.askyesno(message="Desea consultar los manuales?", title="ayuda")
+        help = tkinter.messagebox.askyesno(
+            message="Desea consultar los manuales?", title="ayuda")
         if help:
             print('abrir manuales')
         else:
             print("ok, tu puedes")
 
     def aboutus(self):
-        tkinter.messagebox.showinfo(message="Carlos Rodrigo Estrada Najarro\nCarnet: 201700314", title="About Us")
+        tkinter.messagebox.showinfo(
+            message="Carlos Rodrigo Estrada Najarro\nCarnet: 201700314", title="About Us")
 
     def debugg(self):
         print('debugg')
