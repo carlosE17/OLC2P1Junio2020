@@ -3,8 +3,23 @@ import tkinter.scrolledtext as scrolledtext
 import tkinter.ttk as ttk
 import tkinter.messagebox
 from tkinter import filedialog
+from AST import Estaticos
+from Entorno import Entorno
+from Tipo import tipoInstruccion
 
 rutas = []
+
+def Ejec(Linstr,c):
+    LErr=[]
+    i=0
+    ast=Estaticos(c,LErr,i)
+    entornoG=Entorno()
+    try:
+        c.insert(INSERT,"ejecutando...")
+    except:
+        print("se encontraron errores")
+    # generar reportes de errores, y graficar el arbol
+    
 
 
 class Ventana:
@@ -49,13 +64,13 @@ class Ventana:
 
         menuDebug.add_command(label="debuggear", command=self.debugg)
 
-        menuReportes.add_command(label="Errores lexicos")
-        menuReportes.add_command(label="Errores lexicos")
-        menuReportes.add_command(label="Errores lexicos")
+        menuReportes.add_command(label="Errores Lexicos", command=self.errLex)
+        menuReportes.add_command(label="Errores Sintacticos", command=self.errSin)
+        menuReportes.add_command(label="Errores Semanticos", command=self.errSem)
         menuReportes.add_separator()
-        menuReportes.add_command(label="Tabla de Simbolos")
-        menuReportes.add_command(label="AST")
-        menuReportes.add_command(label="Reporte Gramatical")
+        menuReportes.add_command(label="Tabla de Simbolos", command=self.tbSimb)
+        menuReportes.add_command(label="AST",command=self.astRepo)
+        menuReportes.add_command(label="Reporte Gramatical", command=self.repoGram)
 
 
         menuAyuda.add_command(label="ayuda", command=self.ayuda)
@@ -117,7 +132,13 @@ class Ventana:
         return self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].get(1.0, END)
 
     def ejecutar(self):
+        if not (len(self.ventanas.tabs()) != 0 and len(rutas) > self.ventanas.index('current')):
+            tkinter.messagebox.showerror(
+                "Error", "No se encontro consola de entrada de texto")
+            return
+
         txtEntrada = self.getTextoActual()
+        
         print(self.esDescendente.get())
         if(self.esDescendente.get()):
             self.salida.insert(INSERT, txtEntrada)
@@ -125,6 +146,8 @@ class Ventana:
         else:
             self.salida.insert(INSERT, txtEntrada)
             print("ascendente")
+
+        Ejec(txtEntrada,self.salida)
 
     def nuevo(self):
         editor = scrolledtext.ScrolledText(
@@ -206,7 +229,19 @@ class Ventana:
     def debugg(self):
         print('debugg')
 
-
+    def errLex(self):
+        print("Errores lexicos")
+    def errSin(self):
+        print("Errores sintacticos")
+    def errSem(self):
+        print("Errores semanticos")
+    def tbSimb(self):
+        print("Tabla de simbolos")
+    def astRepo(self):
+        print("Repo AST")
+    def repoGram(self):
+        print("repo gramatica")
+    
 # loop------------------------------------------------
 ventana1 = Tk()
 ventana1.title('Proyecto1')
