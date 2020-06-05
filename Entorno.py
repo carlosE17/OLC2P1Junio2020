@@ -5,7 +5,6 @@ class Entorno:
     def __init__(self):
         self.tabla={}
         self.etiquetas={}
-        self.funciones={}
     
     def actualizar(self,nombre,simbolo):
         self.tabla[str(nombre)]=simbolo
