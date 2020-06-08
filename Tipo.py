@@ -6,6 +6,9 @@ class tipoPrimitivo(enum.Enum):
     Doble=3
     Arreglo=4
     Error=5
+    variable=6
+    acceso=7
+    puntero=8
 
 class tipoInstruccion(enum.Enum):
     etiqueta=1
@@ -14,3 +17,11 @@ class tipoInstruccion(enum.Enum):
     asignacionV=4
     salto=5
     condicional=6
+
+class nodoAST:
+    def __init__(self,v,n):
+        self.vNodo=v
+        self.nNodo=n
+        self.hijos=[]
+
+

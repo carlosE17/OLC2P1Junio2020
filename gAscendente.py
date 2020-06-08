@@ -33,6 +33,8 @@ tokens  = [
     'MENORQ',
     'MAYORQ',
     'DOBIGUAL',
+    'DOBAND',
+    'DOBOR',
     'NOIGUAL',
     'MAYORIGUALQ',
     'MENORIGUALQ',
@@ -66,14 +68,17 @@ t_CEJA      = r'~'
 t_MENORQ    = r'<'
 t_MAYORQ    = r'>'
 t_DOBIGUAL  = r'=='
+t_DOBAND    = r'&&'
+t_DOBOR     = r'\|\|'
 t_NOIGUAL   = r'!='
 t_MAYORIGUALQ = r'>='
 t_MENORIGUALQ = r'<='
-t_POTENC    = r'^'
+t_POTENC    = r'\^'
 t_ROTIZQ    = r'<<'
 t_ROTDER    = r'>>'
 
 Lerr=[]
+noNodo=0
 from CError import CError
 def t_DECIMAL(t):
     r'-?\d+\.\d+'
@@ -81,6 +86,7 @@ def t_DECIMAL(t):
         t.value = float(t.value)
     except ValueError:
         print("Float value too large %d", t.value)
+        global Lerr
         Lerr.append(CError('Lexico','Error en el valor float',0,t.lexer.lineno))
         t.value = 0
     return t
@@ -91,6 +97,7 @@ def t_ENTERO(t):
         t.value = int(t.value)
     except ValueError:
         print("Integer value too large %d", t.value)
+        global Lerr
         Lerr.append(CError('Lexico','Error en el valor entero',0,t.lexer.lineno))
         t.value = 0
     return t
@@ -112,7 +119,7 @@ def t_VARIABLE(t):
 
 # Comentario simple // ...
 def t_COMENTARIO_SIMPLE(t):
-    r'#.*\n'
+    r'\#.*\n'
     t.lexer.lineno += 1
 
 # Caracteres ignorados
@@ -131,6 +138,7 @@ def find_column(input,token):
     
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
+    global Lerr
     Lerr.append(CError('Lexico','Caracter invalido \''+t.value[0]+'\'',0,t.lexer.lineno))
     t.lexer.skip(1)
 
@@ -143,13 +151,13 @@ lexer = lex.lex()
 precedence = (
     ('left','MAS','MENOS'),
     ('left','POR','DIVIDIDO'),
-    ('right','UMENOS'),
     )
 
 # Definición de la gramática
 
 from Expresion import *
 from Instruccion import *
+
 
 
 def p_init(t) :
@@ -167,89 +175,169 @@ def p_instrucciones_instruccion(t) :
     t[0] = [t[1]]
 
 def p_instruccion(t) :
-    '''instruccion      : imprimir_instr
-                        | definicion_instr
-                        | asignacion_instr
-                        | mientras_instr
-                        | if_instr
-                        | if_else_instr'''
+    '''instruccion      : etiqueta
+                        | salto
+                        | asignacion
+                        | unset
+                        | imprimir_
+                        | exit_
+                        | if_'''
     t[0] = t[1]
 
-def p_instruccion_imprimir(t) :
-    'imprimir_instr     : IMPRIMIR PARIZQ expresion_cadena PARDER PTCOMA'
-    t[0] =Imprimir(t[3])
+def p_etiqueta_instr(t) :
+    'etiqueta     : LABEL DOSPTS'
+    global noNodo
+    t[0] =newEtiqueta(t[1],t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=2
+    
+def p_salto_instr(t) :
+    'salto   : RGOTO LABEL PTCOMA'
+    global noNodo
+    t[0] =newSalto(t[2],t.lexpos(2),t.lineno(2),noNodo)
+    noNodo+=3
 
-def p_instruccion_definicion(t) :
-    'definicion_instr   : NUMERO ID PTCOMA'
-    t[0] =Definicion(t[2])
 
-def p_asignacion_instr(t) :
-    'asignacion_instr   : ID IGUAL expresion_numerica PTCOMA'
-    t[0] =Asignacion(t[1], t[3])
+# def p_asignacions_instr(t) :
+#     'asignacion   : VARIABLE IGUAL exp PTCOMA'
+#     global noNodo
+#     t[0] =newAsignacion(t[1],[],t[3],t.lexpos(1),t.lineno(1),noNodo)
+#     noNodo+=4
 
-def p_mientras_instr(t) :
-    'mientras_instr     : MIENTRAS PARIZQ expresion_logica PARDER LLAVIZQ instrucciones LLAVDER'
-    t[0] =Mientras(t[3], t[6])
+def p_asignaciona_instr(t) :
+    'asignacion   : VARIABLE indicess IGUAL exp PTCOMA'
+    global noNodo
+    t[0]=newAsignacion(t[1],t[2],t[4],t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=4
 
-def p_if_instr(t) :
-    'if_instr           : IF PARIZQ expresion_logica PARDER LLAVIZQ instrucciones LLAVDER'
-    t[0] =If(t[3], t[6])
+def p_indicess_L(t):
+    'indicess   : indices'
+    t[0]=t[1]
 
-def p_if_else_instr(t) :
-    'if_else_instr      : IF PARIZQ expresion_logica PARDER LLAVIZQ instrucciones LLAVDER ELSE LLAVIZQ instrucciones LLAVDER'
-    t[0] =IfElse(t[3], t[6], t[10])
+def p_indicess_empty(t):
+    'indicess   : '
+    t[0]=[]
+
+def p_indices_L(t):
+    'indices   : indices CORCHA primitivo CORCHC'
+    t[1].append(t[3])
+    t[0]=t[1]
+
+def p_indice(t):
+    'indices   : CORCHA primitivo CORCHC'
+    t[0]=[t[1]]
+
+def p_unset_instr(t):
+    'unset   : RUNSET PARA vars PARC PTCOMA'
+    global noNodo
+    t[0]=newUnset(t[3],t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=4
+
+def p_imprimir_instr(t):
+    'imprimir_   : IMPRIMIR PARA vars PARC PTCOMA'
+    global noNodo
+    t[0]=newImprimir(t[3],t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=4
+
+def p_salir_instr(t):
+    'exit_   : SALIR PTCOMA'
+    global noNodo
+    t[0]=newSalir(t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=1
+
+def p_if_instr(t):
+    'if_   : IF PARA exp PARC RGOTO LABEL PTCOMA'
+    global noNodo
+    t[0]=newIF(t[3],t[6],t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=6
+
 
 def p_expresion_binaria(t):
-    '''expresion_numerica : expresion_numerica MAS expresion_numerica
-                        | expresion_numerica MENOS expresion_numerica
-                        | expresion_numerica POR expresion_numerica
-                        | expresion_numerica DIVIDIDO expresion_numerica'''
-    if t[2] == '+'  : t[0] = ExpresionBinaria(t[1], t[3], OPERACION_ARITMETICA.MAS)
-    elif t[2] == '-': t[0] = ExpresionBinaria(t[1], t[3], OPERACION_ARITMETICA.MENOS)
-    elif t[2] == '*': t[0] = ExpresionBinaria(t[1], t[3], OPERACION_ARITMETICA.POR)
-    elif t[2] == '/': t[0] = ExpresionBinaria(t[1], t[3], OPERACION_ARITMETICA.DIVIDIDO)
+    '''exp : primitivo MAS primitivo
+            | primitivo MENOS primitivo
+            | primitivo POR primitivo
+            | primitivo DIVIDIDO primitivo
+            | primitivo MODULO primitivo
+            | primitivo AND primitivo
+            | primitivo DOBAND primitivo
+            | primitivo OR primitivo
+            | primitivo DOBOR primitivo
+            | primitivo POTENC primitivo
+            | primitivo XOR primitivo
+            | primitivo ROTIZQ primitivo
+            | primitivo ROTDER primitivo
+            | primitivo DOBIGUAL primitivo
+            | primitivo NOIGUAL primitivo
+            | primitivo MENORQ primitivo
+            | primitivo MAYORQ primitivo
+            | primitivo MAYORIGUALQ primitivo
+            | primitivo MENORIGUALQ primitivo'''
+    global noNodo
+    if t[2] == '+'  : t[0] = newSuma(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '-': t[0] = newResta(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '*': t[0] = newMultiplicacion(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '/': t[0] = newDivision(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '%': t[0] = newModulo(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    noNodo+=1
 
 def p_expresion_unaria(t):
-    'expresion_numerica : MENOS expresion_numerica %prec UMENOS'
-    t[0] = ExpresionNegativo(t[2])
+    '''exp : MENOS primitivo
+            | AND primitivo
+            | LEER PARA PARC
+            | VABSOL PARA primitivo PARC
+            | NOT primitivo
+            | CEJA primitivo
+            | ARREGLO PARA PARC'''
+    global noNodo
+    if t[1] == '-'  : t[0] = newNegacion(t[2],t.lexpos(2),t.lineno(2),noNodo)
+    noNodo+=1
 
-def p_expresion_agrupacion(t):
-    'expresion_numerica : PARIZQ expresion_numerica PARDER'
-    t[0] = t[2]
+def p_expresion_casteo(t):
+    '''exp : PARA TINT PARC primitivo
+            | PARA TFLOAT PARC primitivo
+            | PARA TCHAR PARC primitivo'''
+    t[0] = t[4]
 
-def p_expresion_number(t):
-    '''expresion_numerica : ENTERO
-                        | DECIMAL'''
-    t[0] = ExpresionNumero(t[1])
+def p_exp_primitivo(t):
+    'exp : primitivo'
+    t[0]=t[1]
 
-def p_expresion_id(t):
-    'expresion_numerica   : ID'
-    t[0] = ExpresionIdentificador(t[1])
+def p_exp_entero(t):
+    'primitivo : ENTERO'
+    global noNodo
+    t[0] = primitivo(tipoPrimitivo.Entero,t[1],t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=1
 
-def p_expresion_concatenacion(t) :
-    'expresion_cadena     : expresion_cadena CONCAT expresion_cadena'
-    t[0] = ExpresionConcatenar(t[1], t[3])
+def p_exp_decimal(t):
+    'primitivo : DECIMAL'
+    global noNodo
+    t[0] = primitivo(tipoPrimitivo.Doble,t[1],t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=1
 
-def p_expresion_cadena(t) :
-    'expresion_cadena     : CADENA'
-    t[0] = ExpresionDobleComilla(t[1])
+def p_exp_cadena(t):
+    'primitivo : CADENA'
+    global noNodo
+    t[0] = primitivo(tipoPrimitivo.Cadena,t[1],t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=1
 
-def p_expresion_cadena_numerico(t) :
-    'expresion_cadena     : expresion_numerica'
-    t[0] = ExpresionCadenaNumerico(t[1])
+def p_exp_variables(t):
+    'primitivo : vars'
+    t[0] = t[1]
 
-def p_expresion_logica(t) :
-    '''expresion_logica : expresion_numerica MAYQUE expresion_numerica
-                        | expresion_numerica MENQUE expresion_numerica
-                        | expresion_numerica IGUALQUE expresion_numerica
-                        | expresion_numerica NIGUALQUE expresion_numerica'''
-    if t[2] == '>'    : t[0] = ExpresionLogica(t[1], t[3], OPERACION_LOGICA.MAYOR_QUE)
-    elif t[2] == '<'  : t[0] = ExpresionLogica(t[1], t[3], OPERACION_LOGICA.MENOR_QUE)
-    elif t[2] == '==' : t[0] = ExpresionLogica(t[1], t[3], OPERACION_LOGICA.IGUAL)
-    elif t[2] == '!=' : t[0] = ExpresionLogica(t[1], t[3], OPERACION_LOGICA.DIFERENTE)
+def p_exp_id(t):
+    'vars : VARIABLE'
+    global noNodo
+    t[0] = id_(t[1],t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=1
+
+def p_exp_acceso(t):
+    'vars : VARIABLE indices'
+    t[0] = t[1]
+
 
 def p_error(t):
     print(t)
+    global Lerr
+    Lerr.append(CError('Sintactico','Se encontro \''+t.value+'\'',t.lexpos,t.lineno))
     print("Error sintáctico en '%s'" % t.value)
 
 import ply.yacc as yacc
@@ -258,3 +346,15 @@ parser = yacc.yacc()
 
 def parse(input) :
     return parser.parse(input)
+
+def getLerr():
+    global Lerr
+    return Lerr
+
+def resetLerr():
+    global Lerr
+    Lerr=[]
+
+def resetNonodo():
+    global noNodo
+    noNodo=0

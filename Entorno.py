@@ -18,7 +18,7 @@ class Entorno:
     
     def getPosEtiqueta(self, nombre,columna,linea,ast):
         if str(nombre) in self.etiquetas:
-            return self.etiquetas[str(nombre)]
+            return int(self.etiquetas[str(nombre)])
         else:
             ast.Lerrores.append(CError('Semantico','No se encontro la Etiqueta \''+str(nombre)+'\' probablemente no esta declarada',columna,linea))
             return None  

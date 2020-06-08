@@ -6,18 +6,20 @@ from tkinter import filedialog
 from AST import Estaticos
 from Entorno import Entorno
 from Tipo import tipoInstruccion
+import gAscendente as g1
 
 rutas = []
 
-def Ejec(Linstr,c):
-    LErr=[]
-    i=0
-    ast=Estaticos(c,LErr,i)
+def Ejec(Linstr,c,Le):
+    LErr=Le
+    ast=Estaticos(c,LErr,len(Linstr))
     entornoG=Entorno()
     try:
-        c.insert(INSERT,"ejecutando...")
-    except:
-        print("se encontraron errores")
+        while ast.i<len(Linstr):
+            Linstr[ast.i].ejecutar(entornoG,ast)
+            ast.i+=1
+    except Exception as e:
+        print(e)
     # generar reportes de errores, y graficar el arbol
     
 
@@ -119,6 +121,10 @@ class Ventana:
                                   font=("Arial", 12), command=self.ejecutar)
         self.btnEjecutar.grid(row=5, column=0)
 
+        self.btnNext = Button(topFrame, text="Next", bg="light gray", fg="black",
+                                  font=("Arial", 12),state=DISABLED)
+        self.btnNext.grid(row=6, column=1)
+
         # fin botones etc-------------------------------------------
 
         # vamos a pasar la consola para que asi siempre se trabaje sobre la misma
@@ -138,16 +144,20 @@ class Ventana:
             return
 
         txtEntrada = self.getTextoActual()
-        
+        if len(txtEntrada)==0:
+            return
+        self.salida.delete('1.0', END)
+        self.salida.insert(INSERT, "Output:\n")
         print(self.esDescendente.get())
         if(self.esDescendente.get()):
             self.salida.insert(INSERT, txtEntrada)
             print("Descendente")
         else:
-            self.salida.insert(INSERT, txtEntrada)
-            print("ascendente")
+            g1.resetLerr()
+            g1.resetNonodo()
+            resultado=g1.parse(txtEntrada)
+            Ejec(resultado,self.salida,g1.Lerr)
 
-        Ejec(txtEntrada,self.salida)
 
     def nuevo(self):
         editor = scrolledtext.ScrolledText(
@@ -228,6 +238,7 @@ class Ventana:
 
     def debugg(self):
         print('debugg')
+        self.btnNext.config(state=NORMAL)
 
     def errLex(self):
         print("Errores lexicos")
