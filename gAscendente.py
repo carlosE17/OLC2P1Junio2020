@@ -81,7 +81,7 @@ Lerr=[]
 noNodo=0
 from CError import CError
 def t_DECIMAL(t):
-    r'-?\d+\.\d+'
+    r'\d+\.\d+'
     try:
         t.value = float(t.value)
     except ValueError:
@@ -92,7 +92,7 @@ def t_DECIMAL(t):
     return t
 
 def t_ENTERO(t):
-    r'-?\d+'
+    r'\d+'
     try:
         t.value = int(t.value)
     except ValueError:
@@ -277,6 +277,22 @@ def p_expresion_binaria(t):
     elif t[2] == '*': t[0] = newMultiplicacion(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
     elif t[2] == '/': t[0] = newDivision(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
     elif t[2] == '%': t[0] = newModulo(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '&': t[0] = newAndBtb(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '&&': t[0] = newAnd(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '|': t[0] = newOrBtb(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '||': t[0] = newOr(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '^': t[0] = newXorBtb(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2].lower() == 'xor': t[0] = newXor(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '<<': t[0] = newDespIzqBtb(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '>>': t[0] = newDespDerBtb(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '==': t[0] = newEqual(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '!=': t[0] = newNotEqual(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '<': t[0] = newMenorq(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '>': t[0] = newMayorq(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '<=': t[0] = newMenorIgualq(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+    elif t[2] == '>=': t[0] = newMayorIgualq(t[1],t[3],t.lexpos(2),t.lineno(2),noNodo)
+
+    
     noNodo+=1
 
 def p_expresion_unaria(t):
@@ -288,8 +304,9 @@ def p_expresion_unaria(t):
             | CEJA primitivo
             | ARREGLO PARA PARC'''
     global noNodo
-    if t[1] == '-'  : t[0] = newNegacion(t[2],t.lexpos(2),t.lineno(2),noNodo)
-    noNodo+=1
+    if t[1] == '-'  : t[0] = newNegacion(t[2],t.lexpos(1),t.lineno(1),noNodo)
+    elif t[1]== '&' : t[0] = newPuntero(t[2],t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=2
 
 def p_expresion_casteo(t):
     '''exp : PARA TINT PARC primitivo
@@ -337,8 +354,13 @@ def p_exp_acceso(t):
 def p_error(t):
     print(t)
     global Lerr
-    Lerr.append(CError('Sintactico','Se encontro \''+t.value+'\'',t.lexpos,t.lineno))
+    Lerr.append(CError('Sintactico','Se encontro \''+str(t.value)+'\'',str(t.lexpos),str(t.lineno)))
     print("Error sintáctico en '%s'" % t.value)
+    while True:
+        tok = parser.token()             # Get the next token
+        if not tok or tok.type == 'PTCOMA': 
+            break
+    parser.restart()
 
 import ply.yacc as yacc
 parser = yacc.yacc()

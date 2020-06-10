@@ -2,6 +2,7 @@ from Tipo import *
 from CError import CError
 from Simbolo import Simbolo
 from tkinter import *
+from Expresion import newPuntero
 class newEtiqueta:
     def __init__(self,v,c,l,n):
         self.tipo=tipoInstruccion.etiqueta
@@ -47,11 +48,12 @@ class newAsignacion:
 
     def ejecutar(self,entorno,estat):
         resultado=self.valor.getvalor(entorno,estat)
+        print(type(resultado))
         if resultado.tipo==tipoPrimitivo.Error:
             estat.Lerrores.append(CError('Semantico','no se puede asignar error a la variable \''+str(self.id)+'\'',self.columna,self.linea))
             return
         temp=None
-        if resultado.tipo==tipoPrimitivo.puntero:
+        if isinstance(self.valor,newPuntero):
             temp=resultado
         else:
             temp=Simbolo(resultado.tipo,resultado)
@@ -96,10 +98,12 @@ class newImprimir:
 
     def ejecutar(self,entorno,estat):
         temp=self.v.getvalor(entorno,estat)
+        print(str(temp))
         if temp.tipo!=tipoPrimitivo.Error:
             estat.consola.insert(INSERT, str(temp.valor)+"\n")
         else:
            estat.Lerrores.append(CError('Semantico','No se puede imprimir un error',self.columna,self.linea))
+        print('instr 105')
  
 
 class newSalir:
@@ -129,7 +133,7 @@ class newIF:
         temp=self.condicion.getvalor(entorno,estat)
         if temp.tipo==tipoPrimitivo.Entero:
             valtemp=int(temp.valor)
-            if valtemp>0:
+            if valtemp!=0:
                 if self.label in entorno.etiquetas:
                     estat.i=int(entorno.etiquetas[self.label])
                 else:

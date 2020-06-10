@@ -7,6 +7,7 @@ from AST import Estaticos
 from Entorno import Entorno
 from Tipo import tipoInstruccion
 import gAscendente as g1
+from Instruccion import newEtiqueta
 
 rutas = []
 
@@ -14,14 +15,40 @@ def Ejec(Linstr,c,Le):
     LErr=Le
     ast=Estaticos(c,LErr,len(Linstr))
     entornoG=Entorno()
+    iEt=0
+    try:
+        while iEt<len(Linstr):
+            if(isinstance(Linstr[iEt],newEtiqueta)):
+                entornoG.addEtiqueta(Linstr[iEt].label_,iEt)
+            iEt+=1
+    except Exception as e:
+        print('ventana[25] '+e)
+
+
     try:
         while ast.i<len(Linstr):
             Linstr[ast.i].ejecutar(entornoG,ast)
             ast.i+=1
     except Exception as e:
-        print(e)
+        print('veentana[33]'+str(e))
     # generar reportes de errores, y graficar el arbol
-    
+    gReporteErr(ast.Lerrores)
+
+def gReporteErr(L):
+    if len(L)!=0:
+        texto='digraph {\n'
+        t=''
+        for i in L:
+            t+=i.getTexto()
+        texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td><td>Columna</td></tr>\n"+ t+ "    </table>\n" + ">];}"
+        with open('reporteErrores.dot', "w") as f:
+                f.write(texto)
+    else:
+        with open('reporteErrores.dot', "w") as f:
+                f.write('digraph G {\"No hay errores\"}')
+
+        
+               
 
 
 class Ventana:
@@ -122,7 +149,7 @@ class Ventana:
         self.btnEjecutar.grid(row=5, column=0)
 
         self.btnNext = Button(topFrame, text="Next", bg="light gray", fg="black",
-                                  font=("Arial", 12),state=DISABLED)
+                                  font=("Arial", 12),state=DISABLED,command=self.nextDebug)
         self.btnNext.grid(row=6, column=1)
 
         # fin botones etc-------------------------------------------
@@ -131,7 +158,7 @@ class Ventana:
         # def addtext(c,t):
         #     c.insert(INSERT,str(t)+'\n')
         # addtext(salida,'prueba')
-
+        
         # fin bottomFrame----------------------------------------------------------------------------------------
 
     def getTextoActual(self):
@@ -237,7 +264,31 @@ class Ventana:
             message="Carlos Rodrigo Estrada Najarro\nCarnet: 201700314", title="About Us")
 
     def debugg(self):
-        print('debugg')
+        if not (len(self.ventanas.tabs()) != 0 and len(rutas) > self.ventanas.index('current')):
+            tkinter.messagebox.showerror(
+                "Error", "No se encontro consola de entrada de texto")
+            return
+
+        txtEntrada = self.getTextoActual()
+        if len(txtEntrada)==0:
+            return
+        self.salida.delete('1.0', END)
+        self.salida.insert(INSERT, "Output:\n")
+        g1.resetLerr()
+        g1.resetNonodo()
+        resultado=g1.parse(txtEntrada)
+        self.astDebug=Estaticos(self.salida,g1.Lerr,len(resultado))
+        self.entornoDebug=Entorno()
+        self.Ldebugger=resultado
+        iEt=0
+        try:
+            while iEt<len(resultado):
+                if(isinstance(resultado[iEt],newEtiqueta)):
+                    self.entornoDebug.addEtiqueta(resultado[iEt].label_,iEt)
+                iEt+=1
+        except Exception as e:
+            print('ventana[292] '+e)
+
         self.btnNext.config(state=NORMAL)
 
     def errLex(self):
@@ -252,7 +303,20 @@ class Ventana:
         print("Repo AST")
     def repoGram(self):
         print("repo gramatica")
-    
+    def nextDebug(self):
+        try:
+            if self.astDebug.i<len(self.Ldebugger):
+                self.Ldebugger[self.astDebug.i].ejecutar(self.entornoDebug,self.astDebug)
+                self.astDebug.i+=1
+            else:
+                self.btnNext.config(state=DISABLED)                
+        except Exception as e:
+            print(str(e)+'ventana[314]')
+            self.astDebug.i+=1
+        # generar reportes de errores, y graficar el arbol
+        gReporteErr(self.astDebug.Lerrores)
+
+
 # loop------------------------------------------------
 ventana1 = Tk()
 ventana1.title('Proyecto1')
