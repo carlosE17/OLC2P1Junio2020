@@ -1,5 +1,7 @@
 from Tipo import *
 from CError import CError
+from tkinter import *
+import sys
 
 class primitivo:
     def __init__(self,t,v,c,l,n):
@@ -20,7 +22,7 @@ class id_:
     def getvalor(self,entorno,estat):
         temp=entorno.buscar(self.variable,self.columna,self.linea,estat)
         if temp!=None:
-            return temp.valor
+            return temp.valor.getvalor(entorno,estat)
         else:
             return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
@@ -148,7 +150,6 @@ class newDivision:
             estat.Lerrores.append(CError('Semantico','Error al realizar la DIVISION',self.columna,self.linea))
             return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
-
 class newModulo:
     def __init__(self,izq,der,c,l,n):
         self.columna=c
@@ -208,8 +209,12 @@ class newAnd:
             if der.tipo==tipoPrimitivo.Entero:
                 if(int(izq.valor)!=0):
                     izq=1
+                else:
+                    izq=0
                 if(int(der.valor)!=0):
                     der=1
+                else:
+                    der=0
                 return primitivo(tipoPrimitivo.Entero,izq and der,self.columna,self.linea,0)
         else:
             estat.Lerrores.append(CError('Semantico','Error al realizar And',self.columna,self.linea))
@@ -231,8 +236,12 @@ class newOr:
             if der.tipo==tipoPrimitivo.Entero:
                 if(int(izq.valor)!=0):
                     izq=1
+                else:
+                    izq=0
                 if(int(der.valor)!=0):
                     der=1
+                else:
+                    der=0
                 return primitivo(tipoPrimitivo.Entero,izq or der,self.columna,self.linea,0)
         else:
             estat.Lerrores.append(CError('Semantico','Error al realizar Or',self.columna,self.linea))
@@ -254,13 +263,36 @@ class newXor:
             if der.tipo==tipoPrimitivo.Entero:
                 if(int(izq.valor)!=0):
                     izq=1
+                else:
+                    izq=0
                 if(int(der.valor)!=0):
                     der=1
+                else:
+                    der=0
                 return primitivo(tipoPrimitivo.Entero,izq ^ der,self.columna,self.linea,0)
         else:
             estat.Lerrores.append(CError('Semantico','Error al realizar Xor',self.columna,self.linea))
             return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
+class newNot:
+    def __init__(self,der,c,l,n):
+        self.columna=c
+        self.linea=l
+        self.vNodo=nodoAST('Not',n)
+        self.vNodo.hijos.append(nodoAST('!',n+1))
+        self.vNodo.hijos.append(der.vNodo)
+        self.hijoDer=der
+    def getvalor(self,entorno,estat):
+        der=self.hijoDer.getvalor(entorno,estat)
+        if der.tipo==tipoPrimitivo.Entero:
+            if(int(der.valor)!=0):
+                der=1
+            else:
+                der=0
+            return primitivo(tipoPrimitivo.Entero,int(not der),self.columna,self.linea,0)
+        else:
+            estat.Lerrores.append(CError('Semantico','Error al realizar Xor',self.columna,self.linea))
+            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newEqual:
     def __init__(self,izq,der,c,l,n):
@@ -371,7 +403,6 @@ class newMenorq:
         estat.Lerrores.append(CError('Semantico','Error al realizar Menor Que',self.columna,self.linea))
         return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
-
 class newMayorq:
     def __init__(self,izq,der,c,l,n):
         self.columna=c
@@ -390,7 +421,6 @@ class newMayorq:
 
         estat.Lerrores.append(CError('Semantico','Error al realizar Mayor Que',self.columna,self.linea))
         return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
-
 
 class newMenorIgualq:
     def __init__(self,izq,der,c,l,n):
@@ -411,7 +441,6 @@ class newMenorIgualq:
         estat.Lerrores.append(CError('Semantico','Error al realizar Menor igual Que',self.columna,self.linea))
         return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
-
 class newMayorIgualq:
     def __init__(self,izq,der,c,l,n):
         self.columna=c
@@ -429,6 +458,64 @@ class newMayorIgualq:
                 return primitivo(tipoPrimitivo.Entero,int(float(izq.valor)>=float(der.valor)),self.columna,self.linea,0)
 
         estat.Lerrores.append(CError('Semantico','Error al realizar Mayor Igual Que',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+
+
+class popupWindow(object):
+    def __init__(self,master):
+        top=self.top=Toplevel(master)
+        self.l=Label(top,text="Hello World")
+        self.l.pack()
+        self.e=Entry(top)
+        self.e.pack()
+        self.b=Button(top,text='Ok',command=self.cleanup)
+        self.b.pack()
+    def cleanup(self):
+        self.value=self.e.get()
+        self.top.destroy()
+
+class newLeer:
+    def __init__(self,c,l,n):
+        self.columna=c
+        self.linea=l
+        self.vNodo=nodoAST('Leer',n)
+        self.vNodo.hijos.append(nodoAST('read',n+1))
+        self.vNodo.hijos.append(nodoAST('(',n+2))
+        self.vNodo.hijos.append(nodoAST(')',n+3))
+    def getvalor(self,entorno,estat):
+        
+        parent = estat.consola.master
+        print(type(parent))
+        entrada=popupWindow(parent)
+        # parent.configure(state='disable')
+        parent.wait_window(entrada.top)
+        # parent.configure(state='enable')
+        txtinput=str(entrada.value)
+        if txtinput.lstrip('-').replace('.','',1).isdigit():
+            if "." in txtinput:
+                return primitivo(tipoPrimitivo.Doble,float(txtinput),self.columna,self.linea,0)
+            else:
+                return primitivo(tipoPrimitivo.Entero,int(txtinput),self.columna,self.linea,0)
+        else:
+            return primitivo(tipoPrimitivo.Cadena,txtinput,self.columna,self.linea,0)
+
+class newAbsoluto:
+    def __init__(self,v,c,l,n):
+        self.columna=c
+        self.linea=l
+        self.v1=v
+        self.vNodo=nodoAST('vAbsoluto',n)
+        self.vNodo.hijos.append(nodoAST('abs',n+1))
+        self.vNodo.hijos.append(nodoAST('(',n+2))
+        self.vNodo.hijos.append(v.vNodo)
+        self.vNodo.hijos.append(nodoAST(')',n+3))
+    def getvalor(self,entorno,estat):
+        temp=self.v1.getvalor(entorno,estat)
+        if temp.tipo==tipoPrimitivo.Entero:
+            return primitivo(tipoPrimitivo.Entero,abs(int(temp.valor)),self.columna,self.linea,0)
+        elif temp.tipo==tipoPrimitivo.Doble:
+            return primitivo(tipoPrimitivo.Doble,abs(float(temp.valor)),self.columna,self.linea,0)
+        estat.Lerrores.append(CError('Semantico','Error al realizar abs()',self.columna,self.linea))
         return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 
@@ -525,6 +612,27 @@ class newXorBtb:
             estat.Lerrores.append(CError('Semantico','Error al realizar XOR bit a bit',self.columna,self.linea))
             return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
+class newNotBtb:
+    def __init__(self,izq,c,l,n):
+        self.columna=c
+        self.linea=l
+        self.vNodo=nodoAST('~',n)
+        self.vNodo.hijos.append(izq.vNodo)
+        self.hijoIzq=izq
+    def getvalor(self,entorno,estat):
+        izq=self.hijoIzq.getvalor(entorno,estat)
+        if izq.tipo==tipoPrimitivo.Entero:
+            bizq=bin(int(izq.valor)).replace("b","").replace('-','')
+            res='0'
+            pos=1
+            while pos<len(bizq):
+                res+=str(int(not int(bizq[pos])))
+                pos+=1    
+            return primitivo(tipoPrimitivo.Entero,int(res,2),self.columna,self.linea,0)
+        else:
+            estat.Lerrores.append(CError('Semantico','Error al realizar Not bit a bit',self.columna,self.linea))
+            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+
 
 class newDespIzqBtb:
     def __init__(self,izq,der,c,l,n):
@@ -586,7 +694,6 @@ class newDespDerBtb:
             return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 
-
 class newNegacion:
     def __init__(self,v,c,l,n):
         self.columna=c
@@ -617,13 +724,91 @@ class newPuntero:
         if(isinstance(self.exp,id_)):
             temp=entorno.buscar(self.exp.variable,self.columna,self.linea,estat)
             if temp!=None:
-                return temp
+                return temp.valor
             else:
                 return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
         else:
             print('aun no hay arreglos xd')
             
-        
+
+class newCasteoInt:
+    def __init__(self,izq,c,l,n):
+        self.columna=c
+        self.linea=l
+        self.vNodo=nodoAST('Casteo',n)
+        self.vNodo.hijos.append(nodoAST('(',n+1))
+        self.vNodo.hijos.append(nodoAST('int',n+2))
+        self.vNodo.hijos.append(nodoAST('(',n+3))
+        self.vNodo.hijos.append(izq.vNodo)
+        self.hijoIzq=izq
+
+    def getvalor(self,entorno,estat):
+        izq=self.hijoIzq.getvalor(entorno,estat)
+        if izq.tipo==tipoPrimitivo.Entero:
+            return primitivo(tipoPrimitivo.Entero,int(float(izq.valor)),self.columna,self.linea,0)
+        elif izq.tipo==tipoPrimitivo.Doble:
+            return primitivo(tipoPrimitivo.Entero,int(float(izq.valor)),self.columna,self.linea,0)
+        elif izq.tipo==tipoPrimitivo.Cadena:
+            return primitivo(tipoPrimitivo.Entero,ord(str(izq.valor)[0]),self.columna,self.linea,0)
+        elif izq.tipo==tipoPrimitivo.Arreglo:
+            print('aun no hay arreglos xd')
+        else:
+            estat.Lerrores.append(CError('Semantico','Error al realizar casteo a Int',self.columna,self.linea))
+            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+
+
+class newCasteoFloat:
+    def __init__(self,izq,c,l,n):
+        self.columna=c
+        self.linea=l
+        self.vNodo=nodoAST('Casteo',n)
+        self.vNodo.hijos.append(nodoAST('(',n+1))
+        self.vNodo.hijos.append(nodoAST('float',n+2))
+        self.vNodo.hijos.append(nodoAST('(',n+3))
+        self.vNodo.hijos.append(izq.vNodo)
+        self.hijoIzq=izq
+
+    def getvalor(self,entorno,estat):
+        izq=self.hijoIzq.getvalor(entorno,estat)
+        if izq.tipo==tipoPrimitivo.Entero:
+            return primitivo(tipoPrimitivo.Entero,float(izq.valor),self.columna,self.linea,0)
+        elif izq.tipo==tipoPrimitivo.Doble:
+            return primitivo(tipoPrimitivo.Entero,float(izq.valor),self.columna,self.linea,0)
+        elif izq.tipo==tipoPrimitivo.Cadena:
+            return primitivo(tipoPrimitivo.Entero,float(ord(str(izq.valor)[0])),self.columna,self.linea,0)
+        elif izq.tipo==tipoPrimitivo.Arreglo:
+            print('aun no hay arreglos xd')
+        else:
+            estat.Lerrores.append(CError('Semantico','Error al realizar casteo a Float',self.columna,self.linea))
+            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+
+
+class newCasteoChar:
+    def __init__(self,izq,c,l,n):
+        self.columna=c
+        self.linea=l
+        self.vNodo=nodoAST('Casteo',n)
+        self.vNodo.hijos.append(nodoAST('(',n+1))
+        self.vNodo.hijos.append(nodoAST('char',n+2))
+        self.vNodo.hijos.append(nodoAST('(',n+3))
+        self.vNodo.hijos.append(izq.vNodo)
+        self.hijoIzq=izq
+
+    def getvalor(self,entorno,estat):
+        izq=self.hijoIzq.getvalor(entorno,estat)
+        if izq.tipo==tipoPrimitivo.Entero or izq.tipo==tipoPrimitivo.Doble:
+            temp=int(float(izq.valor))
+            if(temp>255):
+                temp=temp%256            
+            return primitivo(tipoPrimitivo.Cadena,chr(int(temp)),self.columna,self.linea,0)        
+        elif izq.tipo==tipoPrimitivo.Cadena:
+            return primitivo(tipoPrimitivo.Cadena,str(izq.valor)[0],self.columna,self.linea,0)
+        elif izq.tipo==tipoPrimitivo.Arreglo:
+            print('aun no hay arreglos xd')
+        else:
+            estat.Lerrores.append(CError('Semantico','Error al realizar casteo a Char',self.columna,self.linea))
+            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+
         
 
 

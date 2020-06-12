@@ -48,13 +48,12 @@ class newAsignacion:
 
     def ejecutar(self,entorno,estat):
         resultado=self.valor.getvalor(entorno,estat)
-        print(type(resultado))
         if resultado.tipo==tipoPrimitivo.Error:
             estat.Lerrores.append(CError('Semantico','no se puede asignar error a la variable \''+str(self.id)+'\'',self.columna,self.linea))
             return
         temp=None
         if isinstance(self.valor,newPuntero):
-            temp=resultado
+            temp=Simbolo(self.valor.tipo,self.valor)
         else:
             temp=Simbolo(resultado.tipo,resultado)
         
@@ -98,14 +97,12 @@ class newImprimir:
 
     def ejecutar(self,entorno,estat):
         temp=self.v.getvalor(entorno,estat)
-        print(str(temp))
         if temp.tipo!=tipoPrimitivo.Error:
-            estat.consola.insert(INSERT, str(temp.valor)+"\n")
+            estat.consola.insert(INSERT, str(temp.valor).replace('\\n','\n').replace('\\t','\t')+"\n")
         else:
            estat.Lerrores.append(CError('Semantico','No se puede imprimir un error',self.columna,self.linea))
         print('instr 105')
  
-
 class newSalir:
     def __init__(self,c,l,n):
         self.columna=c
@@ -114,7 +111,6 @@ class newSalir:
 
     def ejecutar(self,entorno,estat):
         estat.i=estat.e
-
 
 class newIF:
     def __init__(self,cond,label,c,l,n):

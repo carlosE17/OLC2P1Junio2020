@@ -33,6 +33,7 @@ def Ejec(Linstr,c,Le):
         print('veentana[33]'+str(e))
     # generar reportes de errores, y graficar el arbol
     gReporteErr(ast.Lerrores)
+    gReporteTs(entornoG.tabla.items())
 
 def gReporteErr(L):
     if len(L)!=0:
@@ -45,6 +46,20 @@ def gReporteErr(L):
                 f.write(texto)
     else:
         with open('reporteErrores.dot', "w") as f:
+                f.write('digraph G {\"No hay errores\"}')
+
+def gReporteTs(L):
+    nTipos=['Int','String','Float','Array','error',' ',' ','puntero']
+    if len(L)!=0:
+        texto='digraph {\n'
+        t=''
+        for k,v in L:
+            t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.valor) + " </td><td> "+'1' + " </td><td> " + str(v.valor.linea) + " </td><td> "+ '---' + "</td> </tr>"
+        texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>ID</td><td>Tipo</td><td>Valor</td><td>Dimension</td><td>Linea</td><td>Referencia</td></tr>\n"+ t+ "    </table>\n" + ">];}"
+        with open('reporteTs.dot', "w") as f:
+                f.write(texto)
+    else:
+        with open('reporteTs.dot', "w") as f:
                 f.write('digraph G {\"No hay errores\"}')
 
         
@@ -152,15 +167,6 @@ class Ventana:
                                   font=("Arial", 12),state=DISABLED,command=self.nextDebug)
         self.btnNext.grid(row=6, column=1)
 
-        # fin botones etc-------------------------------------------
-
-        # vamos a pasar la consola para que asi siempre se trabaje sobre la misma
-        # def addtext(c,t):
-        #     c.insert(INSERT,str(t)+'\n')
-        # addtext(salida,'prueba')
-        
-        # fin bottomFrame----------------------------------------------------------------------------------------
-
     def getTextoActual(self):
         return self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].get(1.0, END)
 
@@ -171,7 +177,7 @@ class Ventana:
             return
 
         txtEntrada = self.getTextoActual()
-        if len(txtEntrada)==0:
+        if len(txtEntrada)<=1:
             return
         self.salida.delete('1.0', END)
         self.salida.insert(INSERT, "Output:\n")

@@ -233,7 +233,7 @@ def p_unset_instr(t):
     noNodo+=4
 
 def p_imprimir_instr(t):
-    'imprimir_   : IMPRIMIR PARA vars PARC PTCOMA'
+    'imprimir_   : IMPRIMIR PARA primitivo PARC PTCOMA'
     global noNodo
     t[0]=newImprimir(t[3],t.lexpos(1),t.lineno(1),noNodo)
     noNodo+=4
@@ -306,13 +306,23 @@ def p_expresion_unaria(t):
     global noNodo
     if t[1] == '-'  : t[0] = newNegacion(t[2],t.lexpos(1),t.lineno(1),noNodo)
     elif t[1]== '&' : t[0] = newPuntero(t[2],t.lexpos(1),t.lineno(1),noNodo)
-    noNodo+=2
+    elif t[1].lower()== 'read' : t[0] = newLeer(t.lexpos(1),t.lineno(1),noNodo)
+    elif t[1].lower()== 'abs' : t[0] = newAbsoluto(t[3],t.lexpos(1),t.lineno(1),noNodo)
+    elif t[1]== '!' : t[0] = newNot(t[2],t.lexpos(1),t.lineno(1),noNodo)
+    elif t[1]== '~' : t[0] = newNotBtb(t[2],t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=5
 
 def p_expresion_casteo(t):
     '''exp : PARA TINT PARC primitivo
             | PARA TFLOAT PARC primitivo
             | PARA TCHAR PARC primitivo'''
-    t[0] = t[4]
+    global noNodo
+    if t[2].lower()== 'int' : t[0]=newCasteoInt(t[4],t.lexpos(1),t.lineno(1),noNodo)
+    elif t[2].lower()== 'float' : t[0]=newCasteoFloat(t[4],t.lexpos(1),t.lineno(1),noNodo)
+    elif t[2].lower()== 'char' : t[0]=newCasteoChar(t[4],t.lexpos(1),t.lineno(1),noNodo)
+
+
+    noNodo+=5
 
 def p_exp_primitivo(t):
     'exp : primitivo'
@@ -360,7 +370,8 @@ def p_error(t):
         tok = parser.token()             # Get the next token
         if not tok or tok.type == 'PTCOMA': 
             break
-    parser.restart()
+    parser.errok()
+    return tok 
 
 import ply.yacc as yacc
 parser = yacc.yacc()
