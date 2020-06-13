@@ -52,9 +52,9 @@ class newSuma:
         elif izq.tipo==tipoPrimitivo.Cadena:
             if der.tipo==tipoPrimitivo.Cadena:
                 return primitivo(tipoPrimitivo.Cadena,str(izq.valor)+str(der.valor),self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar la SUMA',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar la SUMA',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newResta:
     def __init__(self,izq,der,c,l,n):
@@ -68,6 +68,7 @@ class newResta:
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
+        print('exp[71]')
         if izq.tipo==tipoPrimitivo.Entero:
             if der.tipo==tipoPrimitivo.Entero:
                 return primitivo(tipoPrimitivo.Entero,int(izq.valor)-int(der.valor),self.columna,self.linea,0)
@@ -78,9 +79,9 @@ class newResta:
                 return primitivo(tipoPrimitivo.Doble,float(float(izq.valor)-int(der.valor)),self.columna,self.linea,0)
             elif der.tipo==tipoPrimitivo.Doble:
                 return primitivo(tipoPrimitivo.Doble,float(float(izq.valor)-float(der.valor)),self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar la RESTA',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar la RESTA',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newMultiplicacion:
     def __init__(self,izq,der,c,l,n):
@@ -104,9 +105,9 @@ class newMultiplicacion:
                 return primitivo(tipoPrimitivo.Doble,float(float(izq.valor)*int(der.valor)),self.columna,self.linea,0)
             elif der.tipo==tipoPrimitivo.Doble:
                 return primitivo(tipoPrimitivo.Doble,float(float(izq.valor)*float(der.valor)),self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar la MULTIPLICACION',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar la MULTIPLICACION',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newDivision:
     def __init__(self,izq,der,c,l,n):
@@ -146,9 +147,9 @@ class newDivision:
                     return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
                 return primitivo(tipoPrimitivo.Doble,float(float(izq.valor)/float(der.valor)),self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar la DIVISION',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar la DIVISION',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newModulo:
     def __init__(self,izq,der,c,l,n):
@@ -188,9 +189,9 @@ class newModulo:
                     return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
                 return primitivo(tipoPrimitivo.Doble,float(float(izq.valor)%float(der.valor)),self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar MODULO',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar MODULO',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 
 class newAnd:
@@ -216,9 +217,9 @@ class newAnd:
                 else:
                     der=0
                 return primitivo(tipoPrimitivo.Entero,izq and der,self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar And',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar And',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newOr:
     def __init__(self,izq,der,c,l,n):
@@ -243,9 +244,9 @@ class newOr:
                 else:
                     der=0
                 return primitivo(tipoPrimitivo.Entero,izq or der,self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar Or',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar Or',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newXor:
     def __init__(self,izq,der,c,l,n):
@@ -270,9 +271,9 @@ class newXor:
                 else:
                     der=0
                 return primitivo(tipoPrimitivo.Entero,izq ^ der,self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar Xor',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar Xor',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newNot:
     def __init__(self,der,c,l,n):
@@ -334,9 +335,9 @@ class newEqual:
                     return primitivo(tipoPrimitivo.Entero,int(float(izq.valor)==float(der.valor)),self.columna,self.linea,0)
                 return primitivo(tipoPrimitivo.Entero,0,self.columna,self.linea,0)
 
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar la Igualacion',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar la Igualacion',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newNotEqual:
     def __init__(self,izq,der,c,l,n):
@@ -378,9 +379,9 @@ class newNotEqual:
                     return primitivo(tipoPrimitivo.Entero,int(float(izq.valor)!=float(der.valor)),self.columna,self.linea,0)
                 return primitivo(tipoPrimitivo.Entero,1,self.columna,self.linea,0)
 
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar la Diferencia',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar la Diferencia',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 
 class newMenorq:
@@ -546,9 +547,9 @@ class newAndBtb:
                     pos+=1
                 
                 return primitivo(tipoPrimitivo.Entero,int(res,2),self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar And bit a bit',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar And bit a bit',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newOrBtb:
     def __init__(self,izq,der,c,l,n):
@@ -577,9 +578,9 @@ class newOrBtb:
                     pos+=1
                 
                 return primitivo(tipoPrimitivo.Entero,int(res,2),self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar OR bit a bit',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar OR bit a bit',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newXorBtb:
     def __init__(self,izq,der,c,l,n):
@@ -608,9 +609,9 @@ class newXorBtb:
                     pos+=1
                 
                 return primitivo(tipoPrimitivo.Entero,int(res,2),self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar XOR bit a bit',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar XOR bit a bit',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newNotBtb:
     def __init__(self,izq,c,l,n):
@@ -629,9 +630,9 @@ class newNotBtb:
                 res+=str(int(not int(bizq[pos])))
                 pos+=1    
             return primitivo(tipoPrimitivo.Entero,int(res,2),self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar Not bit a bit',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar Not bit a bit',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 
 class newDespIzqBtb:
@@ -659,9 +660,9 @@ class newDespIzqBtb:
                     res+='0'
 
                 return primitivo(tipoPrimitivo.Entero,int(res,2),self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar Desplazamiento izquierdo bit a bit',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar Desplazamiento izquierdo bit a bit',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 class newDespDerBtb:
     def __init__(self,izq,der,c,l,n):
@@ -689,9 +690,9 @@ class newDespDerBtb:
                         pos+=1
                 
                 return primitivo(tipoPrimitivo.Entero,int(res,2),self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar Desplazamiento derecha bit a bit',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar Desplazamiento derecha bit a bit',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
 
 class newNegacion:
@@ -707,9 +708,9 @@ class newNegacion:
             return primitivo(tipoPrimitivo.Entero,int(int(temp.valor)*-1),self.columna,self.linea,0)
         elif temp.tipo==tipoPrimitivo.Doble:
             return primitivo(tipoPrimitivo.Doble,float(float(temp.valor)*-1),self.columna,self.linea,0)
-        else:
-            estat.Lerrores.append(CError('Semantico','Error al realizar Negacion numerica',self.columna,self.linea))
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0) 
+        
+        estat.Lerrores.append(CError('Semantico','Error al realizar Negacion numerica',self.columna,self.linea))
+        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0) 
 
 class newPuntero:
     def __init__(self,v,c,l,n):
@@ -729,6 +730,7 @@ class newPuntero:
                 return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
         else:
             print('aun no hay arreglos xd')
+            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
             
 
 class newCasteoInt:

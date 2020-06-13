@@ -362,7 +362,6 @@ def p_exp_acceso(t):
 
 
 def p_error(t):
-    print(t)
     global Lerr
     Lerr.append(CError('Sintactico','Se encontro \''+str(t.value)+'\'',str(t.lexpos),str(t.lineno)))
     print("Error sintáctico en '%s'" % t.value)
@@ -370,6 +369,8 @@ def p_error(t):
         tok = parser.token()             # Get the next token
         if not tok or tok.type == 'PTCOMA': 
             break
+    # t.lexer.skip(1)
+    tok = parser.token()
     parser.errok()
     return tok 
 

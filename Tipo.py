@@ -20,8 +20,8 @@ class tipoInstruccion(enum.Enum):
 
 class nodoAST:
     def __init__(self,v,n):
-        self.vNodo=v
-        self.nNodo=n
+        self.vNodo=str(v)
+        self.nNodo=str(n)
         self.hijos=[]
 
 

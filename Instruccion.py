@@ -31,6 +31,7 @@ class newSalto:
         else:
             estat.Lerrores.append(CError('Semantico','no se encontro la etiqueta \''+str(self.label_)+'\'',self.columna,self.linea))
 
+
 class newAsignacion:
     def __init__(self,id,Li,v,c,l,n):
         self.id=id
@@ -42,7 +43,7 @@ class newAsignacion:
         self.vNodo.hijos.append(nodoAST(self.id,n+1))
         self.vNodo.hijos.append(nodoAST('Indices',n+2))
         for i in Li:
-            self.vNodo.hijos[2].hijos.append(i.vNodo)
+            self.vNodo.hijos[1].hijos.append(i.vNodo)
         self.vNodo.hijos.append(nodoAST('=',n+3))
         self.vNodo.hijos.append(v.vNodo)
 
@@ -61,6 +62,7 @@ class newAsignacion:
             entorno.actualizar(self.id,temp)
         else:
             print('aun no hay arreglos xd')
+
 
 class newUnset:
     def __init__(self,id,c,l,n):
@@ -101,7 +103,6 @@ class newImprimir:
             estat.consola.insert(INSERT, str(temp.valor).replace('\\n','\n').replace('\\t','\t')+"\n")
         else:
            estat.Lerrores.append(CError('Semantico','No se puede imprimir un error',self.columna,self.linea))
-        print('instr 105')
  
 class newSalir:
     def __init__(self,c,l,n):

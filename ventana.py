@@ -34,36 +34,81 @@ def Ejec(Linstr,c,Le):
     # generar reportes de errores, y graficar el arbol
     gReporteErr(ast.Lerrores)
     gReporteTs(entornoG.tabla.items())
+    graphAST(Linstr)
 
 def gReporteErr(L):
-    if len(L)!=0:
+    if len(L)>0:
         texto='digraph {\n'
         t=''
+        repL=''
+        repS=''
+        repSem=''
         for i in L:
             t+=i.getTexto()
+            if i.tipo=='Lexico': repL+=i.getTexto()
+            elif i.tipo=='Sintactico': repS+=i.getTexto()
+            else: repSem+=i.getTexto()
         texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td><td>Columna</td></tr>\n"+ t+ "    </table>\n" + ">];}"
         with open('reporteErrores.dot', "w") as f:
                 f.write(texto)
+        texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td><td>Columna</td></tr>\n"+ repL+ "    </table>\n" + ">];}"
+        with open('reporteErroresLexicos.dot', "w") as f:
+                f.write(texto)
+        texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td><td>Columna</td></tr>\n"+ repS+ "    </table>\n" + ">];}"
+        with open('reporteErroresSintacticos.dot', "w") as f:
+                f.write(texto)
+        texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td><td>Columna</td></tr>\n"+ repSem+ "    </table>\n" + ">];}"
+        with open('reporteErroresSemanticos.dot', "w") as f:
+                f.write(texto)
     else:
+        t='digraph G {\"No hay errores\"}'
         with open('reporteErrores.dot', "w") as f:
-                f.write('digraph G {\"No hay errores\"}')
+                f.write(t)
+        with open('reporteErroresLexicos.dot', "w") as f:
+                f.write(t)
+        with open('reporteErroresSintacticos.dot', "w") as f:
+                f.write(t)
+        with open('reporteErroresSemanticos.dot', "w") as f:
+                f.write(t)
 
 def gReporteTs(L):
     nTipos=['Int','String','Float','Array','error',' ',' ','puntero']
-    if len(L)!=0:
-        texto='digraph {\n'
-        t=''
-        for k,v in L:
+    texto='digraph {\n'
+    t=''
+    for k,v in L:
+        if int(v.tipo.value)-1==7:
+            t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.exp.variable) + " </td><td> "+'1' + " </td><td> " + str(v.valor.linea) + " </td><td> "+ str(v.valor.exp.variable) + "</td> </tr>"
+        elif int(v.tipo.value)-1==3:
+            t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.valor) + " </td><td> "+'1' + " </td><td> " + str(v.valor.linea) + " </td><td> "+ '---' + "</td> </tr>"            
+        else:                
             t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.valor) + " </td><td> "+'1' + " </td><td> " + str(v.valor.linea) + " </td><td> "+ '---' + "</td> </tr>"
-        texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>ID</td><td>Tipo</td><td>Valor</td><td>Dimension</td><td>Linea</td><td>Referencia</td></tr>\n"+ t+ "    </table>\n" + ">];}"
-        with open('reporteTs.dot', "w") as f:
-                f.write(texto)
-    else:
-        with open('reporteTs.dot', "w") as f:
-                f.write('digraph G {\"No hay errores\"}')
+    texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>ID</td><td>Tipo</td><td>Valor</td><td>Dimension</td><td>Linea</td><td>Referencia</td></tr>\n"+ t+ "    </table>\n" + ">];}"
+    with open('reporteTs.dot', "w") as f:
+        f.write(texto)
 
         
-               
+def graphAST(L):
+    if len(L)!=0:
+        t='digraph Q { \n  node [shape=record];\n'
+        for i in L:
+            t+='node'+i.vNodo.nNodo+'[label=\"'+i.vNodo.vNodo+'\"];\n'
+            t+='p_inicio ->'+'node'+i.vNodo.nNodo+';\n'
+            t+=dibujo(i.vNodo)
+        t+='\n}'
+        with open('reporteAST.dot', "w") as f:
+                f.write(t)
+    else:
+        with open('reporteAST.dot', "w") as f:
+                f.write('digraph G {\"No hay instrucciones\"}')
+
+def dibujo(n):
+    t=''
+    for i in n.hijos:
+        t+='node'+i.nNodo+'[label=\"'+i.vNodo+'\"];\n'
+        t+='node'+n.nNodo+' -> node'+i.nNodo+';\n'
+        t+=dibujo(i)
+    return t
+
 
 
 class Ventana:
