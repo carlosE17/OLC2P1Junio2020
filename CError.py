@@ -7,4 +7,4 @@ class CError:
         self.tipo=str(t)
         self.descripcion=str(d)
     def getTexto(self):
-        return "<tr> <td> " + self.tipo + "</td><td> " + self.descripcion + " </td><td> " + self.linea + " </td><td> " + self.columna + "</td> </tr>"
+        return "<tr> <td> " + self.tipo + "</td><td> " + self.descripcion + " </td><td> " + self.linea + " </td> </tr>"

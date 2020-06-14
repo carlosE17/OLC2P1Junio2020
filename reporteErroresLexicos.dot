@@ -1,1 +1,8 @@
-digraph G {"No hay errores"}
+digraph {
+ node0 [    shape=plaintext
+    label=<
+
+      <table cellspacing='0'>
+      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td></tr>
+<tr> <td> Lexico</td><td> Caracter invalido '@' </td><td> 4 </td> </tr>    </table>
+>];}

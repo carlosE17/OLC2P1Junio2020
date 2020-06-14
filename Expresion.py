@@ -461,7 +461,6 @@ class newMayorIgualq:
         estat.Lerrores.append(CError('Semantico','Error al realizar Mayor Igual Que',self.columna,self.linea))
         return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
-
 class popupWindow(object):
     def __init__(self,master):
         top=self.top=Toplevel(master)
@@ -758,7 +757,6 @@ class newCasteoInt:
             estat.Lerrores.append(CError('Semantico','Error al realizar casteo a Int',self.columna,self.linea))
             return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
-
 class newCasteoFloat:
     def __init__(self,izq,c,l,n):
         self.columna=c
@@ -783,7 +781,6 @@ class newCasteoFloat:
         else:
             estat.Lerrores.append(CError('Semantico','Error al realizar casteo a Float',self.columna,self.linea))
             return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
-
 
 class newCasteoChar:
     def __init__(self,izq,c,l,n):
@@ -812,6 +809,56 @@ class newCasteoChar:
             return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
 
         
+class newArreglo:
+    def __init__(self,c,l,n):
+        self.columna=c
+        self.linea=l
+        self.vNodo=nodoAST('array()',n)
+        self.arreglo={}
+        self.valor=str(self.arreglo)
+        self.tipo=tipoPrimitivo.Arreglo
+    def getvalor(self,entorno,estat):
+        # actualizar valor en caso se imprima arreglo
+        return self
+    def getClave(self,v,entorno,estat):
+        temp=v.getvalor(entorno,estat)
+        if temp.tipo==tipoPrimitivo.Entero: return int(temp.valor)
+        elif temp.tipo==tipoPrimitivo.Cadena: return str(temp.valor)
+        elif temp.tipo==tipoPrimitivo.Doble: return float(temp.valor)
+        else:
+            estat.Lerrores.append(CError('Semantico','Se esperaba un Int, Float, o String como indice de acceso al struct/Arreglo',self.columna,self.linea))
+            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+
+    def getPos(self,v,entorno,estat):
+        indice=self.getClave(v,entorno,estat)
+        if isinstance(indice,primitivo):
+            return indice
+        else:
+            if indice in self.arreglo:
+                return self.arreglo[indice]
+            else:
+                estat.Lerrores.append(CError('Semantico','No se encontro el indice '+str(indice),self.columna,self.linea))
+                return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+    
+
+    def getTabla(self):
+        texto='\n<table color=\'blue\' cellspacing=\'0\'>\n<tr><td>Clave </td><td>Valor </td></tr>\n'
+        for x,y in self.arreglo.items():
+            if int(y.tipo.value)-1==7:
+                texto+='<tr><td>'+str(x)+'  </td><td>'+str(y.valor.exp.variable)+'  </td></tr>'
+            elif int(y.tipo.value)-1==3:
+                texto+='<tr><td>'+str(x)+'  </td><td>'+str(y.valor.getTabla())+'  </td></tr>'            
+            else:
+                texto+='<tr><td>'+str(x)+'  </td><td>'+str(y.valor.valor)+'  </td></tr>'
+        texto+='</table>'
+        return texto
+    def getProfundidad(self):
+        p=0
+        for x,y in self.arreglo.items():
+            if int(y.tipo.value)-1==3:
+                act=y.valor.getProfundidad()
+                if act>p: p=act
+        return p+1
 
 
             

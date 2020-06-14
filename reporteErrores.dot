@@ -1,1 +1,8 @@
-digraph G {"No hay errores"}
+digraph {
+node0 [    shape=plaintext
+    label=<
+
+      <table cellspacing='0'>
+      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td></tr>
+<tr> <td> Lexico</td><td> Caracter invalido '@' </td><td> 4 </td> </tr><tr> <td> Sintactico</td><td> Se encontro ':' </td><td> 5 </td> </tr><tr> <td> Semantico</td><td> No se encontro la variable '$t12' probablemente no esta declarada </td><td> 8 </td> </tr><tr> <td> Semantico</td><td> No se puede imprimir un error </td><td> 8 </td> </tr>    </table>
+>];}

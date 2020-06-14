@@ -8,7 +8,7 @@ from Entorno import Entorno
 from Tipo import tipoInstruccion
 import gAscendente as g1
 from Instruccion import newEtiqueta
-
+from graphviz import Source
 rutas = []
 
 def Ejec(Linstr,c,Le):
@@ -48,16 +48,16 @@ def gReporteErr(L):
             if i.tipo=='Lexico': repL+=i.getTexto()
             elif i.tipo=='Sintactico': repS+=i.getTexto()
             else: repSem+=i.getTexto()
-        texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td><td>Columna</td></tr>\n"+ t+ "    </table>\n" + ">];}"
+        texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td></tr>\n"+ t+ "    </table>\n" + ">];}"
         with open('reporteErrores.dot', "w") as f:
                 f.write(texto)
-        texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td><td>Columna</td></tr>\n"+ repL+ "    </table>\n" + ">];}"
+        texto = "digraph {\n node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td></tr>\n"+ repL+ "    </table>\n" + ">];}"
         with open('reporteErroresLexicos.dot', "w") as f:
                 f.write(texto)
-        texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td><td>Columna</td></tr>\n"+ repS+ "    </table>\n" + ">];}"
+        texto = "digraph {\n node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td></tr>\n"+ repS+ "    </table>\n" + ">];}"
         with open('reporteErroresSintacticos.dot', "w") as f:
                 f.write(texto)
-        texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td><td>Columna</td></tr>\n"+ repSem+ "    </table>\n" + ">];}"
+        texto = "digraph {\n node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>TIPO</td><td>Descripcion</td><td>Linea</td></tr>\n"+ repSem+ "    </table>\n" + ">];}"
         with open('reporteErroresSemanticos.dot', "w") as f:
                 f.write(texto)
     else:
@@ -79,7 +79,7 @@ def gReporteTs(L):
         if int(v.tipo.value)-1==7:
             t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.exp.variable) + " </td><td> "+'1' + " </td><td> " + str(v.valor.linea) + " </td><td> "+ str(v.valor.exp.variable) + "</td> </tr>"
         elif int(v.tipo.value)-1==3:
-            t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.valor) + " </td><td> "+'1' + " </td><td> " + str(v.valor.linea) + " </td><td> "+ '---' + "</td> </tr>"            
+            t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.getTabla()) + " </td><td> "+str(v.valor.getProfundidad()) + " </td><td> " + str(v.valor.linea) + " </td><td> "+ '---' + "</td> </tr>"            
         else:                
             t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.valor) + " </td><td> "+'1' + " </td><td> " + str(v.valor.linea) + " </td><td> "+ '---' + "</td> </tr>"
     texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>ID</td><td>Tipo</td><td>Valor</td><td>Dimension</td><td>Linea</td><td>Referencia</td></tr>\n"+ t+ "    </table>\n" + ">];}"
@@ -153,6 +153,8 @@ class Ventana:
 
         menuDebug.add_command(label="debuggear", command=self.debugg)
 
+        menuReportes.add_command(label='Todos los Errores',command=self.repoErrores)
+        menuReportes.add_separator()
         menuReportes.add_command(label="Errores Lexicos", command=self.errLex)
         menuReportes.add_command(label="Errores Sintacticos", command=self.errSin)
         menuReportes.add_command(label="Errores Semanticos", command=self.errSem)
@@ -235,6 +237,11 @@ class Ventana:
             g1.resetNonodo()
             resultado=g1.parse(txtEntrada)
             Ejec(resultado,self.salida,g1.Lerr)
+        if len(g1.Lerr)>0:
+            tkinter.messagebox.showerror(
+                "Error", "Se encontraron errores al ejecutar")
+            s = Source.from_file("reporteErrores.dot", format="pdf")
+            s.view()
 
 
     def nuevo(self):
@@ -343,29 +350,39 @@ class Ventana:
         self.btnNext.config(state=NORMAL)
 
     def errLex(self):
-        print("Errores lexicos")
+        s = Source.from_file("reporteErroresLexicos.dot", format="pdf")
+        s.view()
     def errSin(self):
-        print("Errores sintacticos")
+        s = Source.from_file("reporteErroresSintacticos.dot", format="pdf")
+        s.view()
     def errSem(self):
-        print("Errores semanticos")
+        s = Source.from_file("reporteErroresSemanticos.dot", format="pdf")
+        s.view()
     def tbSimb(self):
-        print("Tabla de simbolos")
+        s = Source.from_file("reporteTs.dot", format="pdf")
+        s.view()
     def astRepo(self):
-        print("Repo AST")
+        s = Source.from_file("reporteAST.dot", format="pdf")
+        s.view()
     def repoGram(self):
         print("repo gramatica")
+    def repoErrores(self):
+        s = Source.from_file("reporteErrores.dot", format="pdf")
+        s.view()
     def nextDebug(self):
         try:
             if self.astDebug.i<len(self.Ldebugger):
                 self.Ldebugger[self.astDebug.i].ejecutar(self.entornoDebug,self.astDebug)
                 self.astDebug.i+=1
             else:
-                self.btnNext.config(state=DISABLED)                
+                self.btnNext.config(state=DISABLED)
+                graphAST(self.Ldebugger)                
         except Exception as e:
             print(str(e)+'ventana[314]')
             self.astDebug.i+=1
         # generar reportes de errores, y graficar el arbol
         gReporteErr(self.astDebug.Lerrores)
+        gReporteTs(self.entornoDebug.tabla.items())
 
 
 # loop------------------------------------------------
