@@ -19,6 +19,7 @@ class id_:
         self.linea=l
         self.vNodo=nodoAST(d,n)
         self.variable=d
+        self.tipo=tipoPrimitivo.variable
     def getvalor(self,entorno,estat):
         temp=entorno.buscar(self.variable,self.columna,self.linea,estat)
         if temp!=None:
@@ -68,7 +69,6 @@ class newResta:
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
-        print('exp[71]')
         if izq.tipo==tipoPrimitivo.Entero:
             if der.tipo==tipoPrimitivo.Entero:
                 return primitivo(tipoPrimitivo.Entero,int(izq.valor)-int(der.valor),self.columna,self.linea,0)
@@ -396,7 +396,6 @@ class newMenorq:
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
-        print(str(izq)+' '+str(der))
         if izq.tipo==tipoPrimitivo.Entero or izq.tipo==tipoPrimitivo.Doble:
             if der.tipo==tipoPrimitivo.Entero or der.tipo==tipoPrimitivo.Doble:
                 return primitivo(tipoPrimitivo.Entero,int(float(izq.valor)<float(der.valor)),self.columna,self.linea,0)
@@ -485,7 +484,6 @@ class newLeer:
     def getvalor(self,entorno,estat):
         
         parent = estat.consola.master
-        print(type(parent))
         entrada=popupWindow(parent)
         # parent.configure(state='disable')
         parent.wait_window(entrada.top)
@@ -728,8 +726,10 @@ class newPuntero:
             else:
                 return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
         else:
-            print('aun no hay arreglos xd')
-            return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+            t=self.exp.getvalor(entorno,estat)
+            if t.tipo==tipoPrimitivo.Error:
+                return t
+            return self.exp
             
 
 class newCasteoInt:
@@ -752,7 +752,11 @@ class newCasteoInt:
         elif izq.tipo==tipoPrimitivo.Cadena:
             return primitivo(tipoPrimitivo.Entero,ord(str(izq.valor)[0]),self.columna,self.linea,0)
         elif izq.tipo==tipoPrimitivo.Arreglo:
-            print('aun no hay arreglos xd')
+            if len(izq.arreglo)==0:
+                estat.Lerrores.append(CError('Semantico','Error al realizar casteo a Int',self.columna,self.linea))
+                return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+
+            return newCasteoInt(izq.arreglo[list(izq.arreglo.keys())[0]],self.columna,self.linea,0).getvalor(entorno,estat)
         else:
             estat.Lerrores.append(CError('Semantico','Error al realizar casteo a Int',self.columna,self.linea))
             return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
@@ -777,7 +781,11 @@ class newCasteoFloat:
         elif izq.tipo==tipoPrimitivo.Cadena:
             return primitivo(tipoPrimitivo.Entero,float(ord(str(izq.valor)[0])),self.columna,self.linea,0)
         elif izq.tipo==tipoPrimitivo.Arreglo:
-            print('aun no hay arreglos xd')
+            if len(izq.arreglo)==0:
+                estat.Lerrores.append(CError('Semantico','Error al realizar casteo a Float',self.columna,self.linea))
+                return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+                
+            return newCasteoFloat(izq.arreglo[list(izq.arreglo.keys())[0]],self.columna,self.linea,0).getvalor(entorno,estat)
         else:
             estat.Lerrores.append(CError('Semantico','Error al realizar casteo a Float',self.columna,self.linea))
             return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
@@ -803,7 +811,11 @@ class newCasteoChar:
         elif izq.tipo==tipoPrimitivo.Cadena:
             return primitivo(tipoPrimitivo.Cadena,str(izq.valor)[0],self.columna,self.linea,0)
         elif izq.tipo==tipoPrimitivo.Arreglo:
-            print('aun no hay arreglos xd')
+            if len(izq.arreglo)==0:
+                estat.Lerrores.append(CError('Semantico','Error al realizar casteo a Char',self.columna,self.linea))
+                return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+                
+            return newCasteoChar(izq.arreglo[list(izq.arreglo.keys())[0]],self.columna,self.linea,0).getvalor(entorno,estat)
         else:
             estat.Lerrores.append(CError('Semantico','Error al realizar casteo a Char',self.columna,self.linea))
             return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
@@ -835,30 +847,91 @@ class newArreglo:
             return indice
         else:
             if indice in self.arreglo:
-                return self.arreglo[indice]
+                return self.arreglo[indice].getvalor(entorno,estat)
             else:
                 estat.Lerrores.append(CError('Semantico','No se encontro el indice '+str(indice),self.columna,self.linea))
                 return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
-    
+    def setPos(self,i,v,entorno,estat):
+        indice=self.getClave(i,entorno,estat)
+        if isinstance(indice,primitivo):
+            return
+        else:
+            if isinstance(v,newPuntero):
+                temp=v
+            else:
+                temp=v.getvalor(entorno,estat)
+
+            if temp.tipo!=tipoPrimitivo.Error:
+                self.arreglo[indice]=temp
+            else:
+                estat.Lerrores.append(CError('Semantico','Error al asignar posicion de arreglo ',self.columna,self.linea))
+                
+
 
     def getTabla(self):
         texto='\n<table color=\'blue\' cellspacing=\'0\'>\n<tr><td>Clave </td><td>Valor </td></tr>\n'
         for x,y in self.arreglo.items():
             if int(y.tipo.value)-1==7:
-                texto+='<tr><td>'+str(x)+'  </td><td>'+str(y.valor.exp.variable)+'  </td></tr>'
+                texto+='<tr><td>'+str(x)+'  </td><td> '+str(y.exp.variable)+'  </td></tr>'
             elif int(y.tipo.value)-1==3:
-                texto+='<tr><td>'+str(x)+'  </td><td>'+str(y.valor.getTabla())+'  </td></tr>'            
+                texto+='<tr><td>'+str(x)+'  </td><td>'+str(y.getTabla())+'  </td></tr>'            
             else:
-                texto+='<tr><td>'+str(x)+'  </td><td>'+str(y.valor.valor)+'  </td></tr>'
+                texto+='<tr><td>'+str(x)+'  </td><td>'+str(y.valor)+'  </td></tr>'
         texto+='</table>'
         return texto
     def getProfundidad(self):
         p=0
         for x,y in self.arreglo.items():
             if int(y.tipo.value)-1==3:
-                act=y.valor.getProfundidad()
+                act=y.getProfundidad()
                 if act>p: p=act
         return p+1
+
+
+class newAcceso:
+    def __init__(self,var,Li,c,l,n):
+        self.columna=c
+        self.linea=l
+        self.indices=Li
+        self.ref=var
+        self.variable=str(var)
+        self.vNodo=nodoAST('acceso',n)
+        self.vNodo.hijos.append(nodoAST(str(var),n+1))
+        self.vNodo.hijos.append(nodoAST('Indices',n+2))
+        for i in Li:
+            self.vNodo.hijos[1].hijos.append(i.vNodo)
+            tmp=''
+            if isinstance(i,primitivo):tmp=i.valor
+            elif isinstance(i,id_):tmp=i.variable
+            self.variable+='['+str(tmp)+']'
+    def getvalor(self,entorno,estat):
+        temp=entorno.buscar(self.ref,self.columna,self.linea,estat).valor.getvalor(entorno,estat)
+
+        for i in self.indices:
+            if isinstance(temp,newArreglo):
+                temp=temp.getPos(i,entorno,estat)
+            elif temp.tipo==tipoPrimitivo.Cadena:
+                t=i.getvalor(entorno,estat)
+                if t.tipo==tipoPrimitivo.Entero:
+                    t=int(t.valor)
+                    if t<len(temp.valor):
+                        temp=primitivo(tipoPrimitivo.Cadena,temp.valor[t],self.columna,self.linea,0)
+                    else:
+                        estat.Lerrores.append(CError('Semantico','Indice fuera de rango ',self.columna,self.linea))
+                        return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+                else:
+                    estat.Lerrores.append(CError('Semantico','No se puede acceder, se esperaba indice tipo Int ',self.columna,self.linea))
+                    return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+            else:
+                estat.Lerrores.append(CError('Semantico','solo se puede acceder a Array String ',self.columna,self.linea))
+                return primitivo(tipoPrimitivo.Error,'@error@',self.columna,self.linea,0)
+        
+        return temp
+
+
+
+
+
 
 
             

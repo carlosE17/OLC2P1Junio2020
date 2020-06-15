@@ -224,7 +224,7 @@ def p_indices_L(t):
 
 def p_indice(t):
     'indices   : CORCHA primitivo CORCHC'
-    t[0]=[t[1]]
+    t[0]=[t[2]]
 
 def p_unset_instr(t):
     'unset   : RUNSET PARA vars PARC PTCOMA'
@@ -297,7 +297,7 @@ def p_expresion_binaria(t):
 
 def p_expresion_unaria(t):
     '''exp : MENOS primitivo
-            | AND primitivo
+            | AND vars
             | LEER PARA PARC
             | VABSOL PARA primitivo PARC
             | NOT primitivo
@@ -310,6 +310,7 @@ def p_expresion_unaria(t):
     elif t[1].lower()== 'abs' : t[0] = newAbsoluto(t[3],t.lexpos(1),t.lineno(1),noNodo)
     elif t[1]== '!' : t[0] = newNot(t[2],t.lexpos(1),t.lineno(1),noNodo)
     elif t[1]== '~' : t[0] = newNotBtb(t[2],t.lexpos(1),t.lineno(1),noNodo)
+    elif t[1].lower()== 'array': t[0]=newArreglo(t.lexpos(1),t.lineno(1),noNodo)
     noNodo+=5
 
 def p_expresion_casteo(t):
@@ -358,7 +359,9 @@ def p_exp_id(t):
 
 def p_exp_acceso(t):
     'vars : VARIABLE indices'
-    t[0] = t[1]
+    global noNodo
+    t[0] = newAcceso(t[1],t[2],t.lexpos(1),t.lineno(1),noNodo)
+    noNodo+=5
 
 
 def p_error(t):

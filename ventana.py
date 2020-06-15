@@ -228,7 +228,7 @@ class Ventana:
             return
         self.salida.delete('1.0', END)
         self.salida.insert(INSERT, "Output:\n")
-        print(self.esDescendente.get())
+
         if(self.esDescendente.get()):
             self.salida.insert(INSERT, txtEntrada)
             print("Descendente")
@@ -269,7 +269,7 @@ class Ventana:
                 self.ventanas.add(editor, text=fl, padding=10)
                 self.nVentanas += 1
                 rutas.append(fl)
-        print('abrir')
+
 
     def guardar(self):
         if(len(self.ventanas.tabs()) != 0 and len(rutas) > self.ventanas.index('current')):
