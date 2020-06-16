@@ -5,10 +5,14 @@ import tkinter.messagebox
 from tkinter import filedialog
 from AST import Estaticos
 from Entorno import Entorno
-from Tipo import tipoInstruccion
+from Tipo import tipoInstruccion,tipoPrimitivo
 import gAscendente as g1
-from Instruccion import newEtiqueta
+from Instruccion import newEtiqueta,newSalto,newIF,newAsignacion
 from graphviz import Source
+from CError import CError
+from Simbolo import Simbolo
+from PIL import ImageTk, Image
+import os
 rutas = []
 
 def Ejec(Linstr,c,Le):
@@ -19,10 +23,19 @@ def Ejec(Linstr,c,Le):
     try:
         while iEt<len(Linstr):
             if(isinstance(Linstr[iEt],newEtiqueta)):
+                if Linstr[iEt].label_ in entornoG.etiquetas:
+                    ast.Lerrores.append(CError('Semantico','La etiqueta \''+Linstr[iEt].label_+'\' ya fue declarada',0,iEt+1))
+
                 entornoG.addEtiqueta(Linstr[iEt].label_,iEt)
             iEt+=1
     except Exception as e:
         print('ventana[25] '+e)
+
+    if isinstance(Linstr[0],newEtiqueta):
+        if str(Linstr[0].label_).lower()!='main':
+            ast.Lerrores.append(CError('Semantico','no se encontro la etiqueta Main al inicio',0,1))
+    else:
+        ast.Lerrores.append(CError('Semantico','no se encontro la etiqueta Main al inicio',0,1))
 
 
     try:
@@ -31,9 +44,42 @@ def Ejec(Linstr,c,Le):
             ast.i+=1
     except Exception as e:
         print('veentana[33]'+str(e))
-    # generar reportes de errores, y graficar el arbol
+    # generar reportes de errores, y graficar el arbol---------------------------------------------------------------------
+    try:
+        i_0=0
+        while i_0<len(Linstr):
+            if isinstance(Linstr[i_0],newEtiqueta):
+                entornoG.actualizar(str(Linstr[i_0].label_),Simbolo(tipoPrimitivo.labl,str(Linstr[i_0].label_)+':'))
+            i_0+=1
+
+
+        i_0=0
+        while i_0<len(Linstr):
+            tpo_=tipoPrimitivo.labl
+
+            if isinstance(Linstr[i_0],newSalto):
+                if i_0>0 and i_0<len(Linstr):
+                    if isinstance(Linstr[i_0-1],newAsignacion):
+                        if '$a' in str(Linstr[i_0-1].id).lower():
+                            tpo_=tipoPrimitivo.met1
+                        elif '$v' in str(Linstr[i_0-1].id).lower():
+                            tpo_=tipoPrimitivo.fun1
+                entornoG.actualizar(str(Linstr[i_0].label_),Simbolo(tpo_,str(Linstr[i_0].label_)+':'))
+            elif isinstance(Linstr[i_0],newIF):
+                if i_0>0 and i_0<len(Linstr):
+                    if isinstance(Linstr[i_0-1],newAsignacion):
+                        if '$a' in str(Linstr[i_0-1].id).lower():
+                            tpo_=tipoPrimitivo.met1
+                        elif '$v' in str(Linstr[i_0-1].id).lower():
+                            tpo_=tipoPrimitivo.fun1
+                entornoG.actualizar(str(Linstr[i_0].label),Simbolo(tpo_,str(Linstr[i_0].label)+':'))
+
+            i_0+=1
+    except Exception as e:
+        print('veentana[50]'+str(e))
+    
     gReporteErr(ast.Lerrores)
-    gReporteTs(entornoG.tabla.items())
+    gReporteTs(entornoG.tabla.items(),entornoG.etiquetas)
     graphAST(Linstr)
 
 def gReporteErr(L):
@@ -71,17 +117,23 @@ def gReporteErr(L):
         with open('reporteErroresSemanticos.dot', "w") as f:
                 f.write(t)
 
-def gReporteTs(L):
+def gReporteTs(L,etiq):
     nTipos=['Int','String','Float','Array','error',' ',' ','puntero']
     texto='digraph {\n'
     t=''
     for k,v in L:
         if int(v.tipo.value)-1==7:
-            t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.exp.variable) + " </td><td> "+'1' + " </td><td> " + str(v.valor.linea) + " </td><td> "+ str(v.valor.exp.variable) + "</td> </tr>"
+            t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.exp.variable) + " </td><td> "+'0' + " </td><td> " + str(v.valor.linea) + " </td><td> "+ str(v.valor.exp.variable) + "</td> </tr>"
         elif int(v.tipo.value)-1==3:
             t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.getTabla()) + " </td><td> "+str(v.valor.getProfundidad()) + " </td><td> " + str(v.valor.linea) + " </td><td> "+ '---' + "</td> </tr>"            
+        elif int(v.tipo.value)==9:
+            t+="<tr> <td> " + str(k) + "</td><td> " + 'Etiqueta' + " </td><td> " + str(v.valor) + " </td><td> "+'0' + " </td><td> " + str(etiq[str(k).replace(':','')]+1) + " </td><td> "+ '---' + "</td> </tr>"            
+        elif int(v.tipo.value)==10:
+            t+="<tr> <td> " + str(k) + "</td><td> " + 'Funcion' + " </td><td> " + str(v.valor) + " </td><td> "+'0' + " </td><td> " + str(etiq[str(k).replace(':','')]+1) + " </td><td> "+ '---' + "</td> </tr>"
+        elif int(v.tipo.value)==11:
+            t+="<tr> <td> " + str(k) + "</td><td> " + 'Metodo' + " </td><td> " + str(v.valor) + " </td><td> "+'0' + " </td><td> " + str(etiq[str(k).replace(':','')]+1) + " </td><td> "+ '---' + "</td> </tr>"                    
         else:                
-            t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.valor) + " </td><td> "+'1' + " </td><td> " + str(v.valor.linea) + " </td><td> "+ '---' + "</td> </tr>"
+            t+="<tr> <td> " + str(k) + "</td><td> " + nTipos[int(v.tipo.value)-1] + " </td><td> " + str(v.valor.valor) + " </td><td> "+'0' + " </td><td> " + str(v.valor.linea) + " </td><td> "+ '---' + "</td> </tr>"
     texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>ID</td><td>Tipo</td><td>Valor</td><td>Dimension</td><td>Linea</td><td>Referencia</td></tr>\n"+ t+ "    </table>\n" + ">];}"
     with open('reporteTs.dot', "w") as f:
         f.write(texto)
@@ -109,6 +161,22 @@ def dibujo(n):
         t+=dibujo(i)
     return t
 
+def gramRepo(L,s):
+    texto='digraph {\n'
+    t='<tr><td>INICIO::= INSTRUCCIONES </td><td> INICIO=INSTRUCCIONES; </td></tr>\n'
+    if s==1:
+        t+='<tr><td>INSTRUCCIONES::= INSTRUCCIONES1 INSTRUCCION </td><td> INSTRUCCIONES=INSTRUCCIONES1; INSTRUCCIONES.append(INSTRUCCION); </td></tr>\n'
+        t+='<tr><td>INSTRUCCIONES::= INSTRUCCION </td><td> INSTRUCCIONES=[]; INSTRUCCIONES.append(INSTRUCCION); </td></tr>\n'
+    else:
+        t+=''
+
+    for i in L:
+        t+=i.gramm+'\n'
+    texto += "node0" + " ["+ "    shape=plaintext\n"+ "    label=<\n"+ "\n" +"      <table cellspacing='0'>\n"+ "      <tr><td>PRODUCCION</td><td>ACCIONES</td></tr>\n"+ t+ "    </table>\n" + ">];}"
+    with open('reporteGramatical.dot', "w") as f:
+        f.write(texto)
+
+    
 
 
 class Ventana:
@@ -131,11 +199,15 @@ class Ventana:
         menuDebug = Menu(barraMenu)
         menuAyuda = Menu(barraMenu)
         menuReportes=Menu(barraMenu)
+        menuEditar=Menu(barraMenu)
+        menuRepoImg=Menu(barraMenu)
 
         barraMenu.add_cascade(label="Archivo", menu=menuArchivos)
         barraMenu.add_cascade(label="Colores", menu=menuColores)
         barraMenu.add_cascade(label="Debugger", menu=menuDebug)
-        barraMenu.add_cascade(label="Reportes",menu=menuReportes)
+        barraMenu.add_cascade(label="Reportes PDF",menu=menuReportes)
+        barraMenu.add_cascade(label="Reportes in App",menu=menuRepoImg)
+        barraMenu.add_cascade(label='Editar',menu=menuEditar)
         barraMenu.add_cascade(label="Ayuda", menu=menuAyuda)
         
 
@@ -162,7 +234,23 @@ class Ventana:
         menuReportes.add_command(label="Tabla de Simbolos", command=self.tbSimb)
         menuReportes.add_command(label="AST",command=self.astRepo)
         menuReportes.add_command(label="Reporte Gramatical", command=self.repoGram)
+# 0000
+        menuRepoImg.add_command(label='Todos los Errores',command=self.repoErrores2)
+        menuRepoImg.add_separator()
+        menuRepoImg.add_command(label="Errores Lexicos", command=self.errLex2)
+        menuRepoImg.add_command(label="Errores Sintacticos", command=self.errSin2)
+        menuRepoImg.add_command(label="Errores Semanticos", command=self.errSem2)
+        menuRepoImg.add_separator()
+        menuRepoImg.add_command(label="Tabla de Simbolos", command=self.tbSimb2)
+        menuRepoImg.add_command(label="AST",command=self.astRepo2)
+        menuRepoImg.add_command(label="Reporte Gramatical", command=self.repoGram2)
+        
 
+
+        menuEditar.add_command(label='Copiar',command=self.copiartxt)
+        menuEditar.add_command(label='Pegar',command=self.pegartxt)
+        menuEditar.add_command(label='Buscar y Remplazar',command=self.buscYremp)
+        self.txtCopiado=''
 
         menuAyuda.add_command(label="ayuda", command=self.ayuda)
         menuAyuda.add_command(label="Sobre nosotros", command=self.aboutus)
@@ -237,6 +325,7 @@ class Ventana:
             g1.resetNonodo()
             resultado=g1.parse(txtEntrada)
             Ejec(resultado,self.salida,g1.Lerr)
+            gramRepo(resultado,1)
         if len(g1.Lerr)>0:
             tkinter.messagebox.showerror(
                 "Error", "Se encontraron errores al ejecutar")
@@ -365,16 +454,95 @@ class Ventana:
         s = Source.from_file("reporteAST.dot", format="pdf")
         s.view()
     def repoGram(self):
-        print("repo gramatica")
+        s = Source.from_file("reporteGramatical.dot", format="pdf")
+        s.view()
     def repoErrores(self):
         s = Source.from_file("reporteErrores.dot", format="pdf")
         s.view()
+    
+    # -----------------------------------------
+    def errLex2(self):
+        s = Source.from_file("reporteErroresLexicos.dot", format="png")
+        s.render()
+        parent = self.salida.master
+        entrada=popupRepo(parent,'reporteErroresLexicos.dot.png')
+        parent.wait_window(entrada.top)
+    def errSin2(self):
+        s = Source.from_file("reporteErroresSintacticos.dot", format="png")
+        s.render()
+        parent = self.salida.master
+        entrada=popupRepo(parent,'reporteErroresSintacticos.dot.png')
+        parent.wait_window(entrada.top)
+    def errSem2(self):
+        s = Source.from_file("reporteErroresSemanticos.dot", format="png")
+        s.render()
+        parent = self.salida.master
+        entrada=popupRepo(parent,'reporteErroresSemanticos.dot.png')
+        parent.wait_window(entrada.top)
+    def tbSimb2(self):
+        s = Source.from_file("reporteTs.dot", format="png")
+        s.render()
+        parent = self.salida.master
+        entrada=popupRepo(parent,'reporteTs.dot.png')
+        parent.wait_window(entrada.top)
+    def astRepo2(self):
+        s = Source.from_file("reporteAST.dot", format="png")
+        s.render()
+        parent = self.salida.master
+        entrada=popupRepo(parent,'reporteAST.dot.png')
+        parent.wait_window(entrada.top)
+    def repoGram2(self):
+        s = Source.from_file("reporteGramatical.dot", format="png")
+        s.render()
+        parent = self.salida.master
+        entrada=popupRepo(parent,'reporteGramatical.dot.png')
+        parent.wait_window(entrada.top)
+    def repoErrores2(self):
+        s = Source.from_file("reporteErrores.dot", format="png")
+        s.render()
+        parent = self.salida.master
+        entrada=popupRepo(parent,'reporteErrores.dot.png')
+        parent.wait_window(entrada.top)
+    
+
     def nextDebug(self):
         try:
             if self.astDebug.i<len(self.Ldebugger):
                 self.Ldebugger[self.astDebug.i].ejecutar(self.entornoDebug,self.astDebug)
                 self.astDebug.i+=1
             else:
+                try:
+                    i_0=0
+                    while i_0<len(self.Ldebugger):
+                        if isinstance(self.Ldebugger[i_0],newEtiqueta):
+                            self.entornoDebug.actualizar(str(self.Ldebugger[i_0].label_),Simbolo(tipoPrimitivo.labl,str(self.Ldebugger[i_0].label_)+':'))
+                        i_0+=1
+
+
+                    i_0=0
+                    while i_0<len(self.Ldebugger):
+                        tpo_=tipoPrimitivo.labl
+
+                        if isinstance(self.Ldebugger[i_0],newSalto):
+                            if i_0>0 and i_0<len(self.Ldebugger):
+                                if isinstance(self.Ldebugger[i_0-1],newAsignacion):
+                                    if '$a' in str(self.Ldebugger[i_0-1].id).lower():
+                                        tpo_=tipoPrimitivo.met1
+                                    elif '$v' in str(self.Ldebugger[i_0-1].id).lower():
+                                        tpo_=tipoPrimitivo.fun1
+                            self.entornoDebug.actualizar(str(self.Ldebugger[i_0].label_),Simbolo(tpo_,str(self.Ldebugger[i_0].label_)+':'))
+                        elif isinstance(self.Ldebugger[i_0],newIF):
+                            if i_0>0 and i_0<len(self.Ldebugger):
+                                if isinstance(self.Ldebugger[i_0-1],newAsignacion):
+                                    if '$a' in str(self.Ldebugger[i_0-1].id).lower():
+                                        tpo_=tipoPrimitivo.met1
+                                    elif '$v' in str(self.Ldebugger[i_0-1].id).lower():
+                                        tpo_=tipoPrimitivo.fun1
+                            self.entornoDebug.actualizar(str(self.Ldebugger[i_0].label),Simbolo(tpo_,str(self.Ldebugger[i_0].label)+':'))
+
+                        i_0+=1
+                except Exception as e:
+                    print('veentana[466]'+str(e))
                 self.btnNext.config(state=DISABLED)
                 graphAST(self.Ldebugger)                
         except Exception as e:
@@ -382,8 +550,62 @@ class Ventana:
             self.astDebug.i+=1
         # generar reportes de errores, y graficar el arbol
         gReporteErr(self.astDebug.Lerrores)
-        gReporteTs(self.entornoDebug.tabla.items())
+        gReporteTs(self.entornoDebug.tabla.items(),self.entornoDebug.etiquetas)
 
+    def copiartxt(self):
+        if not (len(self.ventanas.tabs()) != 0 and len(rutas) > self.ventanas.index('current')):
+            tkinter.messagebox.showerror(
+                "Error", "No se encontro consola de entrada de texto")
+            return
+        self.txtCopiado=self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].selection_get()
+    def pegartxt(self):
+        if not (len(self.ventanas.tabs()) != 0 and len(rutas) > self.ventanas.index('current')):
+            tkinter.messagebox.showerror(
+                "Error", "No se encontro consola de entrada de texto")
+            return
+        self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].insert(INSERT,self.txtCopiado)
+    def buscYremp(self):
+        parent = self.salida.master
+        entrada=popupSearch(parent)
+        # parent.configure(state='disable')
+        parent.wait_window(entrada.top)
+        # parent.configure(state='enable')
+        txtbuscar=str(entrada.buscar)
+        txtremplazar=str(entrada.remplazar)
+        newTxt=str(self.getTextoActual()).replace(txtbuscar,txtremplazar)
+        self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].delete('1.0', END)
+        self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].insert(INSERT,newTxt)
+
+
+class popupSearch(object):
+    def __init__(self,master):
+        top=self.top=Toplevel(master)
+        self.l=Label(top,text="Buscar")
+        self.l.pack()
+        self.e=Entry(top)
+        self.e.pack()
+        self.l2=Label(top,text="Remplazar")
+        self.l2.pack()
+        self.e2=Entry(top)
+        self.e2.pack()
+        self.b=Button(top,text='Ok',command=self.cleanup)
+        self.b.pack()
+        self.buscar=''
+        self.remplazar=''
+    def cleanup(self):
+        self.buscar=self.e.get()
+        self.remplazar=self.e2.get()
+        self.top.destroy()
+
+
+class popupRepo(object):
+    def __init__(self,master,path):
+        top=self.top=Toplevel(master) 
+        img = ImageTk.PhotoImage(Image.open(path))
+        panel = Label(top, image = img)
+        panel.image=img
+        #The Pack geometry manager packs widgets in rows or columns.
+        panel.pack(side = "bottom", fill = "both", expand = "yes")
 
 # loop------------------------------------------------
 ventana1 = Tk()

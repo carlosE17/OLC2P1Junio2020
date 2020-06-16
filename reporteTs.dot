@@ -4,11 +4,8 @@ node0 [    shape=plaintext
 
       <table cellspacing='0'>
       <tr><td>ID</td><td>Tipo</td><td>Valor</td><td>Dimension</td><td>Linea</td><td>Referencia</td></tr>
-<tr> <td> $t0</td><td> String </td><td> ahuevo </td><td> 1 </td><td> 26 </td><td> ---</td> </tr><tr> <td> $t1</td><td> Array </td><td> 
+<tr> <td> $s0</td><td> Array </td><td> 
 <table color='blue' cellspacing='0'>
 <tr><td>Clave </td><td>Valor </td></tr>
-<tr><td>1  </td><td>caden@  </td></tr><tr><td>p  </td><td>2  </td></tr><tr><td>0  </td><td>
-<table color='blue' cellspacing='0'>
-<tr><td>Clave </td><td>Valor </td></tr>
-<tr><td>0  </td><td> $t0  </td></tr></table>  </td></tr></table> </td><td> 2 </td><td> 15 </td><td> ---</td> </tr><tr> <td> $t5</td><td> Int </td><td> 99 </td><td> 1 </td><td> 22 </td><td> ---</td> </tr>    </table>
+</table> </td><td> 1 </td><td> 53 </td><td> ---</td> </tr><tr> <td> $sp</td><td> Int </td><td> -1 </td><td> 0 </td><td> 54 </td><td> ---</td> </tr><tr> <td> $a0</td><td> Int </td><td> 0 </td><td> 0 </td><td> 55 </td><td> ---</td> </tr><tr> <td> main</td><td> Etiqueta </td><td> main: </td><td> 0 </td><td> 1 </td><td> ---</td> </tr>    </table>
 >];}

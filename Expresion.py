@@ -10,6 +10,7 @@ class primitivo:
         self.vNodo=nodoAST(v,n)
         self.valor=v
         self.tipo=t
+        self.gramm='\n<tr><td>PRIMITIVO::= '+str(v)+' </td><td> PRIMITIVO= primitivo('+str(v)+');  </td></tr>'
     def getvalor(self,entorno,estat):
         return self
 
@@ -20,6 +21,8 @@ class id_:
         self.vNodo=nodoAST(d,n)
         self.variable=d
         self.tipo=tipoPrimitivo.variable
+        self.gramm='\n<tr><td>PRIMITIVO::= ID </td><td> PRIMITIVO= ID;  </td></tr>'
+        self.gramm+='\n<tr><td>ID::= '+str(d)+' </td><td> ID= id_('+str(d)+');  </td></tr>'
     def getvalor(self,entorno,estat):
         temp=entorno.buscar(self.variable,self.columna,self.linea,estat)
         if temp!=None:
@@ -37,6 +40,10 @@ class newSuma:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 + PRIMITIVO2 </td><td> EXP= newSuma(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -66,6 +73,10 @@ class newResta:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 - PRIMITIVO2 </td><td> EXP= newResta(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -92,6 +103,10 @@ class newMultiplicacion:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 * PRIMITIVO2 </td><td> EXP= newMultiplicacion(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -118,6 +133,10 @@ class newDivision:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 / PRIMITIVO2 </td><td> EXP= newDivision(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -160,6 +179,10 @@ class newModulo:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 % PRIMITIVO2 </td><td> EXP= newModulo(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -203,6 +226,10 @@ class newAnd:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 and and PRIMITIVO2 </td><td> EXP= newAnd(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -230,6 +257,10 @@ class newOr:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 or or PRIMITIVO2 </td><td> EXP= newOr(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -257,6 +288,10 @@ class newXor:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 xor PRIMITIVO2 </td><td> EXP= newXor(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -283,6 +318,9 @@ class newNot:
         self.vNodo.hijos.append(nodoAST('!',n+1))
         self.vNodo.hijos.append(der.vNodo)
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= !PRIMITIVO </td><td> EXP= newNot(PRIMITIVO);  </td></tr>'
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         der=self.hijoDer.getvalor(entorno,estat)
         if der.tipo==tipoPrimitivo.Entero:
@@ -304,6 +342,10 @@ class newEqual:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 == PRIMITIVO2 </td><td> EXP= newEqual(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -348,6 +390,10 @@ class newNotEqual:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 != PRIMITIVO2 </td><td> EXP= newNotEqual(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -388,11 +434,15 @@ class newMenorq:
     def __init__(self,izq,der,c,l,n):
         self.columna=c
         self.linea=l
-        self.vNodo=nodoAST('<',n)
+        self.vNodo=nodoAST('\<',n)
         self.vNodo.hijos.append(izq.vNodo)
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 menorQue PRIMITIVO2 </td><td> EXP= newMenorq(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -407,11 +457,15 @@ class newMayorq:
     def __init__(self,izq,der,c,l,n):
         self.columna=c
         self.linea=l
-        self.vNodo=nodoAST('>',n)
+        self.vNodo=nodoAST('\>',n)
         self.vNodo.hijos.append(izq.vNodo)
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 mayorQue PRIMITIVO2 </td><td> EXP= newMayorq(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -426,11 +480,15 @@ class newMenorIgualq:
     def __init__(self,izq,der,c,l,n):
         self.columna=c
         self.linea=l
-        self.vNodo=nodoAST('<=',n)
+        self.vNodo=nodoAST('\<=',n)
         self.vNodo.hijos.append(izq.vNodo)
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 menorIgualQue PRIMITIVO2 </td><td> EXP= newMenorIgualq(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -445,11 +503,15 @@ class newMayorIgualq:
     def __init__(self,izq,der,c,l,n):
         self.columna=c
         self.linea=l
-        self.vNodo=nodoAST('>=',n)
+        self.vNodo=nodoAST('\>=',n)
         self.vNodo.hijos.append(izq.vNodo)
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 mayorIgualQue PRIMITIVO2 </td><td> EXP= newMayorIgualq(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -463,10 +525,11 @@ class newMayorIgualq:
 class popupWindow(object):
     def __init__(self,master):
         top=self.top=Toplevel(master)
-        self.l=Label(top,text="Hello World")
+        self.l=Label(top,text="Read()")
         self.l.pack()
         self.e=Entry(top)
         self.e.pack()
+        self.value=''
         self.b=Button(top,text='Ok',command=self.cleanup)
         self.b.pack()
     def cleanup(self):
@@ -481,6 +544,8 @@ class newLeer:
         self.vNodo.hijos.append(nodoAST('read',n+1))
         self.vNodo.hijos.append(nodoAST('(',n+2))
         self.vNodo.hijos.append(nodoAST(')',n+3))
+        self.gramm='\n<tr><td>EXP::= READ () </td><td> EXP= newLeer();  </td></tr>'
+
     def getvalor(self,entorno,estat):
         
         parent = estat.consola.master
@@ -507,6 +572,9 @@ class newAbsoluto:
         self.vNodo.hijos.append(nodoAST('(',n+2))
         self.vNodo.hijos.append(v.vNodo)
         self.vNodo.hijos.append(nodoAST(')',n+3))
+        self.gramm='\n<tr><td>EXP::= ABS ( PRIMITIVO ) </td><td> EXP= newAbsoluto(PRIMITIVO);  </td></tr>'
+        self.gramm+=v.gramm
+
     def getvalor(self,entorno,estat):
         temp=self.v1.getvalor(entorno,estat)
         if temp.tipo==tipoPrimitivo.Entero:
@@ -526,6 +594,10 @@ class newAndBtb:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 and PRIMITIVO2 </td><td> EXP= newAndBtb(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -557,6 +629,10 @@ class newOrBtb:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 or PRIMITIVO2 </td><td> EXP= newOrBtb(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -588,6 +664,10 @@ class newXorBtb:
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 ^ PRIMITIVO2 </td><td> EXP= newXorBtb(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -617,6 +697,9 @@ class newNotBtb:
         self.vNodo=nodoAST('~',n)
         self.vNodo.hijos.append(izq.vNodo)
         self.hijoIzq=izq
+        self.gramm='\n<tr><td>EXP::= ~ PRIMITIVO </td><td> EXP= newNotBtb(PRIMITIVO);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         if izq.tipo==tipoPrimitivo.Entero:
@@ -636,11 +719,15 @@ class newDespIzqBtb:
     def __init__(self,izq,der,c,l,n):
         self.columna=c
         self.linea=l
-        self.vNodo=nodoAST('^',n)
+        self.vNodo=nodoAST('\< \<',n)
         self.vNodo.hijos.append(izq.vNodo)
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 despIzq PRIMITIVO2 </td><td> EXP= newDespIzqBtb(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -665,11 +752,15 @@ class newDespDerBtb:
     def __init__(self,izq,der,c,l,n):
         self.columna=c
         self.linea=l
-        self.vNodo=nodoAST('^',n)
+        self.vNodo=nodoAST('\> \>',n)
         self.vNodo.hijos.append(izq.vNodo)
         self.vNodo.hijos.append(der.vNodo)
         self.hijoIzq=izq
         self.hijoDer=der
+        self.gramm='\n<tr><td>EXP::= PRIMITIVO1 despDer PRIMITIVO2 </td><td> EXP= newDespDerBtb(PRIMITIVO1,PRIMITIVO2);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
+        self.gramm+='\n'+str(der.gramm)
+
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
         der=self.hijoDer.getvalor(entorno,estat)
@@ -699,6 +790,9 @@ class newNegacion:
         self.vNodo=nodoAST('-',n)
         self.vNodo.hijos.append(v.vNodo)
         self.exp=v
+        self.gramm='\n<tr><td>EXP::= - PRIMITIVO  </td><td> EXP= newNegacion(PRIMITIVO);  </td></tr>'
+        self.gramm+='\n'+str(v.gramm)
+
     def getvalor(self,entorno,estat):
         temp=self.exp.getvalor(entorno,estat)
         if temp.tipo==tipoPrimitivo.Entero:
@@ -718,6 +812,9 @@ class newPuntero:
         self.vNodo.hijos.append(v.vNodo)
         self.exp=v
         self.tipo=tipoPrimitivo.puntero
+        self.gramm='\n<tr><td>EXP::= and PRIMITIVO  </td><td> EXP= newPuntero(PRIMITIVO);  </td></tr>'
+        self.gramm+='\n'+str(v.gramm)
+
     def getvalor(self,entorno,estat):
         if(isinstance(self.exp,id_)):
             temp=entorno.buscar(self.exp.variable,self.columna,self.linea,estat)
@@ -742,6 +839,8 @@ class newCasteoInt:
         self.vNodo.hijos.append(nodoAST('(',n+3))
         self.vNodo.hijos.append(izq.vNodo)
         self.hijoIzq=izq
+        self.gramm='\n<tr><td>EXP::= (int) PRIMITIVO  </td><td> EXP= newCasteoInt(PRIMITIVO);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
 
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
@@ -771,6 +870,8 @@ class newCasteoFloat:
         self.vNodo.hijos.append(nodoAST('(',n+3))
         self.vNodo.hijos.append(izq.vNodo)
         self.hijoIzq=izq
+        self.gramm='\n<tr><td>EXP::= (float) PRIMITIVO  </td><td> EXP= newCasteoFloat(PRIMITIVO);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
 
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
@@ -800,6 +901,8 @@ class newCasteoChar:
         self.vNodo.hijos.append(nodoAST('(',n+3))
         self.vNodo.hijos.append(izq.vNodo)
         self.hijoIzq=izq
+        self.gramm='\n<tr><td>EXP::= (char) PRIMITIVO  </td><td> EXP= newCasteoChar(PRIMITIVO);  </td></tr>'
+        self.gramm+='\n'+str(izq.gramm)
 
     def getvalor(self,entorno,estat):
         izq=self.hijoIzq.getvalor(entorno,estat)
@@ -829,6 +932,8 @@ class newArreglo:
         self.arreglo={}
         self.valor=str(self.arreglo)
         self.tipo=tipoPrimitivo.Arreglo
+        self.gramm='\n<tr><td>EXP::= ARRAY () </td><td> EXP= newArreglo();  </td></tr>'
+        
     def getvalor(self,entorno,estat):
         # actualizar valor en caso se imprima arreglo
         return self
@@ -867,7 +972,6 @@ class newArreglo:
                 estat.Lerrores.append(CError('Semantico','Error al asignar posicion de arreglo ',self.columna,self.linea))
                 
 
-
     def getTabla(self):
         texto='\n<table color=\'blue\' cellspacing=\'0\'>\n<tr><td>Clave </td><td>Valor </td></tr>\n'
         for x,y in self.arreglo.items():
@@ -898,12 +1002,18 @@ class newAcceso:
         self.vNodo=nodoAST('acceso',n)
         self.vNodo.hijos.append(nodoAST(str(var),n+1))
         self.vNodo.hijos.append(nodoAST('Indices',n+2))
+        self.gramm='\n<tr><td>EXP::= VARIABLE INDICES </td><td> EXP= newAcceso(VARIABLE,INDICES);  </td></tr>'
+        self.gramm+='\n<tr><td>VARIABLE::= '+str(var)+' : </td><td> VARIABLE='+str(var)+';  </td></tr>'
+        self.gramm+='\n<tr><td>INDICES::= INDICES1 [ PRIMITIVO ] : </td><td> INDICES=INDICES1; INDICES.append(PRIMITIVO);  </td></tr>'
+        self.gramm+='\n<tr><td>INDICES::= [PRIMITIVO] : </td><td> INDICES=[]; INDICES.append(PRIMITIVO);  </td></tr>'
         for i in Li:
             self.vNodo.hijos[1].hijos.append(i.vNodo)
             tmp=''
             if isinstance(i,primitivo):tmp=i.valor
             elif isinstance(i,id_):tmp=i.variable
             self.variable+='['+str(tmp)+']'
+            self.gramm+=str(i.gramm)
+
     def getvalor(self,entorno,estat):
         temp=entorno.buscar(self.ref,self.columna,self.linea,estat).valor.getvalor(entorno,estat)
 

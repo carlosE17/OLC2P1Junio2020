@@ -9,6 +9,9 @@ class tipoPrimitivo(enum.Enum):
     variable=6
     acceso=7
     puntero=8
+    labl=9
+    fun1=10
+    met1=11
 
 class tipoInstruccion(enum.Enum):
     etiqueta=1

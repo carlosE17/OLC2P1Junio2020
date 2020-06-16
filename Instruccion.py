@@ -11,6 +11,8 @@ class newEtiqueta:
         self.linea=l
         self.vNodo=nodoAST('LABEL',n)
         self.vNodo.hijos.append(nodoAST(v,n+1))
+        self.gramm='<tr><td>INSTRUCCION::= LABEL : </td><td> INSTRUCCION=newEtiqueta(LABEL); </td></tr>'
+        self.gramm+='\n<tr><td>LABEL::= '+str(v)+' : </td><td> LABEL='+str(v)+';  </td></tr>'
     
     def ejecutar(self,entorno,estat):
         return
@@ -24,6 +26,8 @@ class newSalto:
         self.vNodo=nodoAST('SALTO',n)
         self.vNodo.hijos.append(nodoAST('GOTO',n+1))
         self.vNodo.hijos.append(nodoAST(v,n+2))
+        self.gramm='<tr><td>INSTRUCCION::= GOTO LABEL ; </td><td> INSTRUCCION=newSalto(LABEL); </td></tr>'
+        self.gramm+='\n<tr><td>LABEL::= '+str(v)+' : </td><td> LABEL='+str(v)+';  </td></tr>'
 
     def ejecutar(self,entorno,estat):
         if self.label_ in entorno.etiquetas:
@@ -42,10 +46,18 @@ class newAsignacion:
         self.vNodo=nodoAST('ASIGNACION',n)
         self.vNodo.hijos.append(nodoAST(self.id,n+1))
         self.vNodo.hijos.append(nodoAST('Indices',n+2))
+        self.gramm='<tr><td>INSTRUCCION::= VARIABLE INDICES = EXP ; </td><td> INSTRUCCION=newAsignacion(VARIABLE,INDICES,EXP); </td></tr>'
+        self.gramm+='\n<tr><td>VARIABLE::= '+str(id)+' : </td><td> VARIABLE='+str(id)+';  </td></tr>'
+        self.gramm+='\n<tr><td>INDICES::= INDICES1 [ PRIMITIVO ] : </td><td> INDICES=INDICES1; INDICES.append(PRIMITIVO);  </td></tr>'
+        self.gramm+='\n<tr><td>INDICES::= [PRIMITIVO] : </td><td> INDICES=[]; INDICES.append(PRIMITIVO);  </td></tr>'
         for i in Li:
             self.vNodo.hijos[1].hijos.append(i.vNodo)
+            self.gramm+=str(i.gramm)
         self.vNodo.hijos.append(nodoAST('=',n+3))
         self.vNodo.hijos.append(v.vNodo)
+        self.gramm+='\n<tr><td>EXP::= PRIMITIVO : </td><td> EXP= PRIMITIVO;  </td></tr>'
+        self.gramm+=str(v.gramm)
+        
 
     def getClave(self,v,entorno,estat):
         temp=v.getvalor(entorno,estat)
@@ -118,9 +130,6 @@ class newAsignacion:
                 estat.Lerrores.append(CError('Semantico','Se esperaba string o Array',self.columna,self.linea))
                 return
 
-           
-
-
 
 class newUnset:
     def __init__(self,id,c,l,n):
@@ -132,6 +141,9 @@ class newUnset:
         self.vNodo.hijos.append(nodoAST('(',n+2))
         self.vNodo.hijos.append(self.id.vNodo)
         self.vNodo.hijos.append(nodoAST(')',n+3))
+        self.gramm='<tr><td>INSTRUCCION::= UNSET(VARIABLE) ; </td><td> INSTRUCCION=newUnset(VARIABLE); </td></tr>'
+        self.gramm+='\n<tr><td>VARIABLE::= '+str(id.vNodo.vNodo)+' : </td><td> VARIABLE='+str(id.vNodo.vNodo)+';  </td></tr>'
+
 
     def ejecutar(self,entorno,estat):
         if self.id.tipo==tipoPrimitivo.variable:
@@ -154,19 +166,22 @@ class newImprimir:
         self.vNodo.hijos.append(nodoAST('(',n+2))
         self.vNodo.hijos.append(v.vNodo)
         self.vNodo.hijos.append(nodoAST(')',n+3))
+        self.gramm='<tr><td>INSTRUCCION::= PRINT (PRIMITIVO); </td><td> INSTRUCCION=newImprimir(PRIMITIVO); </td></tr>'
+        self.gramm+=v.gramm
 
     def ejecutar(self,entorno,estat):
         temp=self.v.getvalor(entorno,estat)
-        if temp.tipo!=tipoPrimitivo.Error:
+        if temp.tipo!=tipoPrimitivo.Error and temp.tipo!=tipoPrimitivo.Arreglo:
             estat.consola.insert(INSERT, str(temp.valor).replace('\\n','\n').replace('\\t','\t')+"\n")
         else:
-           estat.Lerrores.append(CError('Semantico','No se puede imprimir un error',self.columna,self.linea))
+           estat.Lerrores.append(CError('Semantico','No se puede imprimir un error ni Arreglo',self.columna,self.linea))
  
 class newSalir:
     def __init__(self,c,l,n):
         self.columna=c
         self.linea=l
         self.vNodo=nodoAST('exit',n)
+        self.gramm='<tr><td>INSTRUCCION::= EXIT ; </td><td> INSTRUCCION=newSalir(); </td></tr>'
 
     def ejecutar(self,entorno,estat):
         estat.i=estat.e
@@ -184,6 +199,10 @@ class newIF:
         self.vNodo.hijos.append(nodoAST(')',n+3))
         self.vNodo.hijos.append(nodoAST('goto',n+4))
         self.vNodo.hijos.append(nodoAST(label,n+5))
+        self.gramm='<tr><td>INSTRUCCION::= IF(EXP) GOTO LABEL ; </td><td> INSTRUCCION=newIF(EXP,LABEL); </td></tr>'
+        self.gramm+='\n<tr><td>LABEL::= '+str(label)+' : </td><td> LABEL='+str(label)+';  </td></tr>'
+        self.gramm+='\n<tr><td>EXP::= PRIMITIVO : </td><td> EXP= PRIMITIVO;  </td></tr>'
+        self.gramm+=str(cond.gramm)
     def ejecutar(self,entorno,estat):
         temp=self.condicion.getvalor(entorno,estat)
         if temp.tipo==tipoPrimitivo.Entero:
