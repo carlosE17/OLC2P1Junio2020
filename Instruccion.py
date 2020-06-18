@@ -35,7 +35,6 @@ class newSalto:
         else:
             estat.Lerrores.append(CError('Semantico','no se encontro la etiqueta \''+str(self.label_)+'\'',self.columna,self.linea))
 
-
 class newAsignacion:
     def __init__(self,id,Li,v,c,l,n):
         self.id=id
@@ -121,15 +120,15 @@ class newAsignacion:
                         t[claves[i]]=str(temp.valor.getvalor(entorno,estat).valor)
                         tmp.valor=''.join(t)
                     else:
-                        estat.Lerrores.append(CError('Semantico','Indice fuera de rango en String',self.columna,self.linea))
-                        return
+                        t=list(tmp.valor)
+                        t.append(str(temp.valor.getvalor(entorno,estat).valor))
+                        tmp.valor=''.join(t)
                 else:
                     estat.Lerrores.append(CError('Semantico','String solo acepta indices tipo Int',self.columna,self.linea))
                     return
             else:
                 estat.Lerrores.append(CError('Semantico','Se esperaba string o Array',self.columna,self.linea))
                 return
-
 
 class newUnset:
     def __init__(self,id,c,l,n):
@@ -172,7 +171,7 @@ class newImprimir:
     def ejecutar(self,entorno,estat):
         temp=self.v.getvalor(entorno,estat)
         if temp.tipo!=tipoPrimitivo.Error and temp.tipo!=tipoPrimitivo.Arreglo:
-            estat.consola.insert(INSERT, str(temp.valor).replace('\\n','\n').replace('\\t','\t')+"\n")
+            estat.consola.insert(INSERT, str(temp.valor).replace('\\n','\n').replace('\\t','\t')+"")
         else:
            estat.Lerrores.append(CError('Semantico','No se puede imprimir un error ni Arreglo',self.columna,self.linea))
  

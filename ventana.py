@@ -7,6 +7,7 @@ from AST import Estaticos
 from Entorno import Entorno
 from Tipo import tipoInstruccion,tipoPrimitivo
 import gAscendente as g1
+import gDescendente as g2
 from Instruccion import newEtiqueta,newSalto,newIF,newAsignacion
 from graphviz import Source
 from CError import CError
@@ -168,7 +169,8 @@ def gramRepo(L,s):
         t+='<tr><td>INSTRUCCIONES::= INSTRUCCIONES1 INSTRUCCION </td><td> INSTRUCCIONES=INSTRUCCIONES1; INSTRUCCIONES.append(INSTRUCCION); </td></tr>\n'
         t+='<tr><td>INSTRUCCIONES::= INSTRUCCION </td><td> INSTRUCCIONES=[]; INSTRUCCIONES.append(INSTRUCCION); </td></tr>\n'
     else:
-        t+=''
+        t+='<tr><td>INSTRUCCIONES::=  INSTRUCCION INSTRUCCIONES1</td><td> INSTRUCCIONES=INSTRUCCIONES1; INSTRUCCIONES.append(INSTRUCCION); </td></tr>\n'
+        t+='<tr><td>INSTRUCCIONES::=  </td><td> INSTRUCCIONES=[];  </td></tr>\n'
 
     for i in L:
         t+=i.gramm+'\n'
@@ -234,7 +236,7 @@ class Ventana:
         menuReportes.add_command(label="Tabla de Simbolos", command=self.tbSimb)
         menuReportes.add_command(label="AST",command=self.astRepo)
         menuReportes.add_command(label="Reporte Gramatical", command=self.repoGram)
-# 0000
+        # 0000
         menuRepoImg.add_command(label='Todos los Errores',command=self.repoErrores2)
         menuRepoImg.add_separator()
         menuRepoImg.add_command(label="Errores Lexicos", command=self.errLex2)
@@ -318,20 +320,24 @@ class Ventana:
         self.salida.insert(INSERT, "Output:\n")
 
         if(self.esDescendente.get()):
-            self.salida.insert(INSERT, txtEntrada)
-            print("Descendente")
+            g2.resetLerr()
+            g2.resetNonodo()
+            g1.resetLerr()
+            resultado=g2.parse(txtEntrada)
+            Ejec(resultado,self.salida,g2.Lerr)
+            gramRepo(resultado,0)
         else:
             g1.resetLerr()
             g1.resetNonodo()
+            g2.resetLerr()
             resultado=g1.parse(txtEntrada)
             Ejec(resultado,self.salida,g1.Lerr)
             gramRepo(resultado,1)
-        if len(g1.Lerr)>0:
+        if len(g1.Lerr)>0 or len(g2.Lerr)>0 :
             tkinter.messagebox.showerror(
                 "Error", "Se encontraron errores al ejecutar")
             s = Source.from_file("reporteErrores.dot", format="pdf")
             s.view()
-
 
     def nuevo(self):
         editor = scrolledtext.ScrolledText(
@@ -358,7 +364,6 @@ class Ventana:
                 self.ventanas.add(editor, text=fl, padding=10)
                 self.nVentanas += 1
                 rutas.append(fl)
-
 
     def guardar(self):
         if(len(self.ventanas.tabs()) != 0 and len(rutas) > self.ventanas.index('current')):
@@ -459,8 +464,7 @@ class Ventana:
     def repoErrores(self):
         s = Source.from_file("reporteErrores.dot", format="pdf")
         s.view()
-    
-    # -----------------------------------------
+        # -----------------------------------------
     def errLex2(self):
         s = Source.from_file("reporteErroresLexicos.dot", format="png")
         s.render()
@@ -504,7 +508,6 @@ class Ventana:
         entrada=popupRepo(parent,'reporteErrores.dot.png')
         parent.wait_window(entrada.top)
     
-
     def nextDebug(self):
         try:
             if self.astDebug.i<len(self.Ldebugger):
@@ -576,7 +579,6 @@ class Ventana:
         self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].delete('1.0', END)
         self.ventanas._nametowidget(self.ventanas.tabs()[self.ventanas.index("current")]).winfo_children()[1].insert(INSERT,newTxt)
 
-
 class popupSearch(object):
     def __init__(self,master):
         top=self.top=Toplevel(master)
@@ -596,7 +598,6 @@ class popupSearch(object):
         self.buscar=self.e.get()
         self.remplazar=self.e2.get()
         self.top.destroy()
-
 
 class popupRepo(object):
     def __init__(self,master,path):
