@@ -1,0 +1,11 @@
+digraph {
+node0 [    shape=plaintext
+    label=<
+
+      <table cellspacing='0'>
+      <tr><td>ID</td><td>Tipo</td><td>Valor</td><td>Dimension</td><td>Linea</td><td>Referencia</td></tr>
+<tr> <td> $s0</td><td> Array </td><td> 
+<table color='blue' cellspacing='0'>
+<tr><td>Clave </td><td>Valor </td></tr>
+<tr><td>0  </td><td>0  </td></tr><tr><td>1  </td><td>0  </td></tr><tr><td>2  </td><td>0  </td></tr><tr><td>3  </td><td>0  </td></tr><tr><td>4  </td><td>0  </td></tr><tr><td>5  </td><td>0  </td></tr><tr><td>6  </td><td>0  </td></tr><tr><td>7  </td><td>0  </td></tr><tr><td>8  </td><td>0  </td></tr><tr><td>9  </td><td>0  </td></tr></table> </td><td> 1 </td><td> 45 </td><td> ---</td> </tr><tr> <td> $sp</td><td> Int </td><td> -1 </td><td> 0 </td><td> 60 </td><td> ---</td> </tr><tr> <td> $a0</td><td> Int </td><td> 0 </td><td> 0 </td><td> 75 </td><td> ---</td> </tr><tr> <td> $a1</td><td> Int </td><td> 11 </td><td> 0 </td><td> 63 </td><td> ---</td> </tr><tr> <td> $t4</td><td> Int </td><td> 1 </td><td> 0 </td><td> 62 </td><td> ---</td> </tr><tr> <td> $v0</td><td> Int </td><td> 11 </td><td> 0 </td><td> 63 </td><td> ---</td> </tr><tr> <td> main</td><td> Etiqueta </td><td> main: </td><td> 0 </td><td> 1 </td><td> ---</td> </tr><tr> <td> ret0</td><td> Funcion </td><td> ret0: </td><td> 0 </td><td> 9 </td><td> ---</td> </tr><tr> <td> ack</td><td> Metodo </td><td> ack: </td><td> 0 </td><td> 12 </td><td> ---</td> </tr><tr> <td> ret1</td><td> Etiqueta </td><td> ret1: </td><td> 0 </td><td> 20 </td><td> ---</td> </tr><tr> <td> ret2</td><td> Etiqueta </td><td> ret2: </td><td> 0 </td><td> 27 </td><td> ---</td> </tr><tr> <td> ret3</td><td> Etiqueta </td><td> ret3: </td><td> 0 </td><td> 36 </td><td> ---</td> </tr>    </table>
+>];}
